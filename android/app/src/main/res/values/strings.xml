@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PanicApp</string>
+    <string name="title_activity_main">PanicApp</string>
+    <string name="package_name">com.production.panic</string>
+    <string name="custom_url_scheme">com.production.panic</string>
+</resources>
