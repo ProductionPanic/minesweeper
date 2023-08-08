@@ -15,6 +15,7 @@
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",
 		"autoprefixer": "^10.4.14",
+		"daisyui": "^3.5.1",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",
 		"sass": "^1.64.1",
@@ -30,6 +31,7 @@
 		"@capacitor/android": "^5.2.2",
 		"@capacitor/cli": "^5.2.2",
 		"@capacitor/core": "^5.2.2",
+		"@lottiefiles/svelte-lottie-player": "^0.3.0",
 		"@sveltejs/adapter-static": "^2.0.3"
 	}
 }
