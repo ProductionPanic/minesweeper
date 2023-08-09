@@ -15,9 +15,7 @@
     }
 </script>
 
-<div
-    class="flex-1 flex flex-col justify-between backdrop-blur-sm bg-base-200 bg-opacity-50 w-full"
->
+<div class="flex-1 flex flex-col justify-between w-full">
     <div class="top-bar">
         <a class="back-icon" href="/">
             <svg class="w-10 h-10" viewBox="0 0 24 24">
@@ -54,8 +52,8 @@
                         <input
                             type="range"
                             min="0"
-                            max="100"
-                            step="10"
+                            max="75"
+                            step="5"
                             bind:value={set.emojirainCount}
                             class="range range-secondary"
                         />

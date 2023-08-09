@@ -91,4 +91,19 @@ export class Games {
 
         return new_game;
     }
+
+
+    public static set_current_game(id: string) {
+        localStorage.setItem('current_game', id);
+    }
+
+    public static get_current_game() {
+        const id = localStorage.getItem('current_game');
+        if (!id) {
+            return null;
+        }
+
+        return this.get_game(id);
+    }
+
 }

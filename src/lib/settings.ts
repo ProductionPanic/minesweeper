@@ -7,7 +7,7 @@ export interface Settings {
 
 const defaultSettings: Settings = {
     emojirain: true,
-    emojirainCount: 100,
+    emojirainCount: 75,
 };
 
 function settingsStore(): Writable<Settings> {

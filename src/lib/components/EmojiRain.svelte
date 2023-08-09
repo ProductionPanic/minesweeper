@@ -1,10 +1,12 @@
 <script lang="ts">
     //EmojiRain.svelte
 
-    import { onMount, tick } from "svelte";
-
-    export let emojis = "💣 💀 🧠 💥 🧨 📍 🏴".split(" ");
-    export let amount = 100;
+    import { onDestroy, onMount, tick } from "svelte";
+    import { browser } from "$app/environment";
+    import type { p5 } from "p5";
+    export let emojis: string[] = "💣 💀 🧠 💥 🧨 📍 🏴".split(" ");
+    export let amount: number = 100;
+    export const bg = "#191E24";
 
     let drops: {
         emoji: string;
@@ -16,82 +18,68 @@
         speed: number;
     }[] = [];
 
-    let canvas: HTMLCanvasElement;
-    let ctx: CanvasRenderingContext2D;
-    let loaded = false;
+    let canvasContainer: HTMLDivElement;
 
     onMount(async () => {
-        loaded = true;
+        if (!browser) return;
+        const p5imoprt = await import("p5");
+        const p5 = p5imoprt.default;
+        new p5((p: p5) => {
+            p.setup = () => {
+                p.createCanvas(
+                    canvasContainer.clientWidth,
+                    canvasContainer.clientHeight
+                ).parent(canvasContainer);
+                p.background(bg);
+                p.noStroke();
+                p.textSize(32);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.textFont("Arial");
+                for (let i = 0; i < amount; i++) {
+                    drops.push({
+                        emoji: emojis[
+                            Math.floor(Math.random() * emojis.length)
+                        ],
+                        x: Math.random() * p.width,
+                        y: Math.random() * p.height,
+                        rotation: Math.random() * 360,
+                        rotation_direction: Math.random() > 0.5 ? 1 : -1,
+                        size: Math.random() * 32 + 16,
+                        speed: Math.random() * 10 + 5,
+                    });
+                }
+            };
 
-        await tick();
-
-        init();
+            p.draw = () => {
+                p.background(bg);
+                for (let i = 0; i < drops.length; i++) {
+                    const drop = drops[i];
+                    p.push();
+                    p.translate(drop.x, drop.y);
+                    p.rotate((drop.rotation * p.PI) / 240);
+                    p.text(drop.emoji, 0, 0);
+                    p.pop();
+                    drop.y += drop.speed;
+                    drop.rotation += drop.rotation_direction * drop.speed;
+                    if (drop.y > p.height) {
+                        drop.y = -drop.size;
+                        drop.x = Math.random() * p.width;
+                    }
+                }
+            };
+        }, canvasContainer);
     });
 
-    function init() {
-        // initialize canvas
-        ctx = canvas.getContext("2d")!;
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // create drops
-        for (let i = 0; i < amount; i++) {
-            drops.push({
-                emoji: emojis[Math.floor(Math.random() * emojis.length)],
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                rotation: Math.random() * 360,
-                rotation_direction: Math.random() > 0.5 ? 1 : -1,
-                size: Math.random() * 20 + 10,
-                speed: Math.random() * 1 + 5,
-            });
-        }
-
-        // start animation
-        requestAnimationFrame(animate);
-    }
-
-    function animate() {
-        // clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // draw drops
-        for (let i = 0; i < drops.length; i++) {
-            const drop = drops[i];
-
-            // draw drop
-            ctx.save();
-            ctx.font = `${drop.size}px serif`;
-            ctx.translate(drop.x, drop.y);
-            ctx.rotate((drop.rotation * Math.PI) / 180);
-            ctx.fillText(drop.emoji, 0, 0);
-            ctx.restore();
-
-            // update drop
-            drop.y += drop.speed;
-            drop.rotation += (drop.speed / 10) * drop.rotation_direction;
-
-            // reset drop
-            if (drop.y > canvas.height) {
-                drop.y = -drop.size;
-                drop.x = Math.random() * canvas.width;
-                drop.rotation = Math.random() * 360;
-                drop.rotation_direction = Math.random() > 0.5 ? 1 : -1;
-            }
-        }
-
-        // loop animation
-        requestAnimationFrame(animate);
-    }
+    onDestroy(() => {
+        drops = [];
+        canvasContainer && (canvasContainer.innerHTML = "");
+    });
 </script>
 
-{#if loaded}
-    <canvas bind:this={canvas} />
-{/if}
+<div class="canvas-container" bind:this={canvasContainer} />
 
 <style>
-    canvas {
-        z-index: -1;
+    .canvas-container {
         position: absolute;
         top: 0;
         left: 0;

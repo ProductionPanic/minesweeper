@@ -32,6 +32,8 @@
 		"@capacitor/cli": "^5.2.2",
 		"@capacitor/core": "^5.2.2",
 		"@lottiefiles/svelte-lottie-player": "^0.3.0",
-		"@sveltejs/adapter-static": "^2.0.3"
+		"@sveltejs/adapter-static": "^2.0.3",
+		"@types/p5": "^1.6.2",
+		"p5": "^1.7.0"
 	}
 }

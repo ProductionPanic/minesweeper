@@ -8,13 +8,12 @@
 
         const game = Games.create_game(parsed);
 
-        goto("/game/" + game.id);
+        Games.set_current_game(game);
+        goto("/game");
     }
 </script>
 
-<div
-    class="flex-1 flex flex-col justify-between backdrop-blur-sm bg-base-200 bg-opacity-50 w-full"
->
+<div class="flex-1 flex flex-col justify-between w-full">
     <div class="top-bar">
         <a class="back-icon" href="/">
             <svg class="w-10 h-10" viewBox="0 0 24 24">

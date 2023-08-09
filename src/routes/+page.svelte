@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Animations from "$lib/components/Animations.svelte";
+    import Animations from "$lib/components/EmojiBackground.svelte";
 </script>
 
-<div class="hero bg-base-200 backdrop-blur-sm bg-opacity-90 mx-4 rounded-md">
+<div class="hero mx-4 rounded-md mt-8">
     <div class="hero-content text-center">
         <div class="max-w-md">
             <h1 class="text-5xl font-bold">Minesweeper</h1>
@@ -13,18 +13,16 @@
     </div>
 </div>
 
-<Animations />
-
-<div class="hero bg-base-200 backdrop-blur-sm bg-opacity-90 mx-4 rounded-md">
+<div class="hero mx-4 rounded-md">
     <div class="hero-content text-center w-full">
         <div class="max-w-md full-width-buttons">
             <div class="grid grid-cols-2 gap-4">
                 <a class="btn btn-primary btn-block" href="/new-game">
                     New game
                 </a>
-                <button class="btn btn-primary btn-outline btn-block">
+                <a class="btn btn-primary btn-outline btn-block" href="/game">
                     Continue last game
-                </button>
+                </a>
             </div>
             <a class="btn btn-neutral btn-block" href="/settings"> Settings </a>
         </div>

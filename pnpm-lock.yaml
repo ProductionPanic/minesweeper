@@ -20,6 +20,12 @@ dependencies:
   '@sveltejs/adapter-static':
     specifier: ^2.0.3
     version: 2.0.3(@sveltejs/kit@1.20.4)
+  '@types/p5':
+    specifier: ^1.6.2
+    version: 1.6.2
+  p5:
+    specifier: ^1.7.0
+    version: 1.7.0
 
 devDependencies:
   '@sveltejs/adapter-auto':
@@ -541,6 +547,10 @@ packages:
 
   /@types/node@20.4.5:
     resolution: {integrity: sha512-rt40Nk13II9JwQBdeYqmbn2Q6IVTA5uPhvSO+JVqdXw/6/4glI6oR9ezty/A9Hg5u7JH4OmYmuQ+XvjKm0Datg==}
+    dev: false
+
+  /@types/p5@1.6.2:
+    resolution: {integrity: sha512-iy1B7DBMc9e5j0DrWnIjSJh+Ro9UkKxPHspbx/GvIeGFTOIJF0H2lICnIN4go1OZEAQSHBinLd7t+oe8lrrLvA==}
     dev: false
 
   /@types/pug@2.0.6:
@@ -1344,6 +1354,10 @@ packages:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
+    dev: false
+
+  /p5@1.7.0:
+    resolution: {integrity: sha512-qrbT/44Dwm63ZtOKX/mp61pw+5yj6ijYLOmRv7p6zcfjbo83Vb0gVFEvW0kTLFu7hceWCig0HONo9F1bSlqbsQ==}
     dev: false
 
   /parent-module@1.0.1:
