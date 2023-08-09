@@ -4,19 +4,22 @@
     import TileElement from "./Tile.svelte";
     import TopBar from "./TopBar.svelte";
     import { goto } from "$app/navigation";
-    import { Board, Tile, difficultyMap } from "$lib/Board";
+    import {
+        Board,
+        GameState,
+        Tile,
+        curBoardTiles,
+        difficultyMap,
+        gameTimer,
+    } from "$lib/Board";
 
     const block_width = 32;
 
     let row_count = 0;
     let col_count = 0;
 
-    let board:Board;
+    let board: Board;
     let game: Game;
-
-
-    let time = 0;
-    let time_interval: NodeJS.Timeout;
 
     let field: HTMLDivElement;
     let tiles: {
@@ -30,42 +33,54 @@
 
     onMount(() => {
         game = Games.get_current_game();
-        console.log(game)
-        board = new Board(game.difficulty as keyof typeof difficultyMap, game.bombs, game.revealed, game.flagged)
+        if (!game) {
+            goto("/");
+            return;
+        }
+        board = new Board(
+            game.difficulty as keyof typeof difficultyMap,
+            game.bombs,
+            game.revealed,
+            game.flagged
+        );
 
         field.style.width = `${board.columnCount * block_width}px`;
         field.style.height = `${board.rowCount * block_width}px`;
         field.style.gridTemplateColumns = `repeat(${board.columnCount}, 1fr)`;
         field.style.gridTemplateRows = `repeat(${board.rowCount}, 1fr)`;
-
-        time_interval = setInterval(() => {
-            time++;
-        }, 1000);
     });
 
     function pause_and_quit() {
         goto("/");
     }
 
-    function flag(tile:Tile) {
+    function flag(tile: Tile) {
         board.flag(tile);
-        board.tiles = [...board.tiles]
+        board.tiles = [...board.tiles];
     }
 
-    function reveal(tile:Tile) {
+    function reveal(tile: Tile) {
         board.reveal(tile);
-        board.tiles = [...board.tiles]
+        board.tiles = [...board.tiles];
     }
-
 </script>
 
 <div class="field-container">
-    <TopBar bind:time on:leave={pause_and_quit} />
+    <TopBar bind:time={$gameTimer} on:leave={pause_and_quit} />
     <div class="field" bind:this={field}>
         {#if board}
-        {#each board.tiles as tile}
-            <TileElement flagged={tile.flagged} bomb={tile.bomb} number={tile.number ?? 0  } revealed={tile.revealed} on:flag={()=>flag(tile)} on:reveal={()=>reveal(tile)} size={block_width} />
-        {/each}
+            {#each $curBoardTiles as tile}
+                <TileElement
+                    flagged={tile.flagged}
+                    bomb={tile.bomb}
+                    number={tile.number ?? 0}
+                    revealed={tile.revealed}
+                    on:flag={() => flag(tile)}
+                    on:reveal={() => reveal(tile)}
+                    size={block_width}
+                    exploded={tile.exploded}
+                />
+            {/each}
         {/if}
     </div>
 </div>

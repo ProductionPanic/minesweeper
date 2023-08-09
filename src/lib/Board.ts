@@ -1,3 +1,5 @@
+import { writable } from "svelte/store";
+
 export const difficultyMap = {
     0: {
         bombRatio: 0.1,
@@ -21,6 +23,39 @@ export enum GameState {
 
 const block_width = 32;
 
+export const curBoardTiles = writable<Tile[]>([]);
+export const gameTimer = writable<number>(0);
+
+class Timer {
+    private static time: number = 0;
+    private static interval: NodeJS.Timeout;
+
+    static start() {
+        this.interval = setInterval(() => {
+            this.time++;
+            gameTimer.set(this.time);
+        }, 1000);
+    }
+
+    static stop() {
+        clearInterval(this.interval);
+    }
+
+    static reset() {
+        this.stop();
+        this.time = 0;
+        this.start();
+    }
+
+    static pause() {
+        this.stop();
+    }
+
+    static resume() {
+        this.start();
+    }
+}
+
 export class Board {
     public tiles: Tile[] = [];
     public difficulty: keyof typeof difficultyMap;
@@ -35,15 +70,18 @@ export class Board {
         this.state = GameState.Initialising;
 
         this.rowCount = Math.floor((window.innerHeight - this.paddingY) / block_width);
-        this.columnCount = Math.floor((window.innerWidth - this.paddingX) / block_width);        
-        
-        if(bombs.length === 0) {
+        this.columnCount = Math.floor((window.innerWidth - this.paddingX) / block_width);
+
+        if (bombs.length === 0) {
             bombs = this.insert_bombs();
         }
-            
-        this.generate_tiles(bombs,revealed,flagged);
+
+        this.generate_tiles(bombs, revealed, flagged);
         this.add_counts();
 
+        curBoardTiles.set(this.tiles);
+
+        Timer.reset();
     }
 
     private insert_bombs() {
@@ -68,7 +106,7 @@ export class Board {
         for (let i = 0; i < total_amount; i++) {
             const x = i % this.columnCount;
             const y = Math.floor(i / this.columnCount);
-            const coords=`${x},${y}`
+            const coords = `${x},${y}`
             const is_bomb = bombs.includes(coords);
             const is_revealed = revealed.includes(coords);
             const is_flagged = flagged.includes(coords);
@@ -81,7 +119,7 @@ export class Board {
         this.tiles.forEach((tile) => {
             const adjacent_tiles = this.get_adjacent_tiles(tile.x, tile.y);
             const adjacent_bombs = adjacent_tiles.filter((t) => t.bomb).length;
-            tile.adjacent_bombs = adjacent_bombs;
+            tile.number = adjacent_bombs;
         });
     }
 
@@ -96,10 +134,10 @@ export class Board {
             [x - 1, y - 1],
             [x, y - 1],
             [x + 1, y - 1],
-            
+
             [x - 1, y],
             [x + 1, y],
-            
+
             [x - 1, y + 1],
             [x, y + 1],
             [x + 1, y + 1],
@@ -125,8 +163,10 @@ export class Board {
 
 
     flag(tile: Tile) {
+        if (tile.revealed) return;
         tile.flagged = !tile.flagged;
         this.checkWon();
+        this.updateStore();
     }
 
     reveal(tile: Tile) {
@@ -139,6 +179,10 @@ export class Board {
         tile.revealed = true;
         if (tile.bomb) {
             this.state = GameState.Lost;
+            Timer.pause();
+            tile.exploded = true;
+
+            this.explode(tile);
             return;
         }
         if (tile.number === 0) {
@@ -146,6 +190,55 @@ export class Board {
             adjacent_tiles.forEach((t) => !t.revealed && this.reveal(t));
         }
         this.checkWon();
+        this.updateStore();
+    }
+
+    getTilesInRadius(tile: Tile, radius: number) {
+        const tiles: Tile[] = [];
+        for (let x = tile.x - radius; x <= tile.x + radius; x++) {
+            for (let y = tile.y - radius; y <= tile.y + radius; y++) {
+                if (x < 0 || x >= this.columnCount) {
+                    continue;
+                }
+                if (y < 0 || y >= this.rowCount) {
+                    continue;
+                }
+                const t = this.get_tile(x, y);
+                tiles.push(t);
+            }
+        }
+        return tiles;
+    }
+
+    async explode(causer: Tile) {
+        let r = 1;
+        let tiles_left = this.columnCount * this.rowCount - 1;
+        while (tiles_left > 0) {
+            // console.log(r);
+            const tiles = this.getTilesInRadius(causer, r);
+            console.log(tiles.length);
+
+            tiles.forEach((t) => {
+                if (!t.exploded) {
+                    tiles_left--;
+                }
+                t.exploded = true;
+                t.revealed = true;
+                // this.reveal(t);
+            });
+            this.tiles = [...this.tiles];
+            this.updateStore();
+            await this.sleep(200);
+            r++;
+        }
+    }
+
+    async sleep(time: number) {
+        return new Promise<void>((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, time);
+        });
     }
 
     checkWon() {
@@ -153,8 +246,15 @@ export class Board {
         const unflagged_tiles = this.tiles.filter((t) => !t.revealed).length;
         if (unflagged_bombs === 0 && unflagged_tiles === 0) {
             this.state = GameState.Won;
+            Timer.pause();
         }
-    }   
+
+        this.updateStore();
+    }
+
+    updateStore() {
+        curBoardTiles.set(this.tiles);
+    }
 }
 
 export class Tile {
@@ -164,6 +264,7 @@ export class Tile {
     public flagged: boolean = false;
     public revealed: boolean = false;
     public number: number | null = null;
+    public exploded: boolean = false;
 
     constructor(x: number, y: number, bomb: boolean = false, flagged: boolean = false, revealed: boolean = false, adjacent_bombs: number | null = null) {
         this.x = x;
