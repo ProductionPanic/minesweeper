@@ -22,18 +22,16 @@
     function mousedown() {
         _mousedown = true;
         _mousedown_timeout = setTimeout(() => {
+            if (!_mousedown) return;
             _mousedown = false;
             dispatch("flag");
         }, 500);
     }
 
     function mouseup() {
-        console.log(_mousedown ? "click" : "long press   ");
-        if (_mousedown) {
+        if (_mousedown && !flagged) {
             dispatch("reveal");
-        } else {
         }
-        console.log(number);
         _mousedown = false;
     }
 </script>

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { settings, updateSettings, type Settings } from "$lib/settings";
     import { onMount } from "svelte";
+    import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
     let set: Settings;
 
@@ -12,6 +13,10 @@
 
     function save() {
         updateSettings(set);
+    }
+
+    function change() {
+        Haptics.impact({ style: ImpactStyle.Light });
     }
 </script>
 
@@ -39,6 +44,7 @@
                             type="checkbox"
                             class="toggle toggle-primary"
                             bind:checked={set.emojirain}
+                            on:change={change}
                         />
                     </label>
                 </div>
@@ -55,6 +61,7 @@
                             max="75"
                             step="5"
                             bind:value={set.emojirainCount}
+                            on:change={change}
                             class="range range-secondary"
                         />
                     </label>

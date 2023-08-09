@@ -4,6 +4,8 @@
     import TileElement from "./Tile.svelte";
     import TopBar from "./TopBar.svelte";
     import { goto } from "$app/navigation";
+    import { Haptics, ImpactStyle } from "@capacitor/haptics";
+
     import {
         Board,
         GameState,
@@ -57,11 +59,13 @@
     function flag(tile: Tile) {
         board.flag(tile);
         board.tiles = [...board.tiles];
+        Haptics.impact({ style: ImpactStyle.Medium });
     }
 
     function reveal(tile: Tile) {
         board.reveal(tile);
         board.tiles = [...board.tiles];
+        Haptics.impact({ style: ImpactStyle.Light });
     }
 </script>
 

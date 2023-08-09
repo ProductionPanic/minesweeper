@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 export const difficultyMap = {
     0: {
@@ -221,6 +222,9 @@ export class Board {
             tiles.forEach((t) => {
                 if (!t.exploded) {
                     tiles_left--;
+                    if (t.bomb) {
+                        Haptics.impact({ style: ImpactStyle.Heavy });
+                    }
                 }
                 t.exploded = true;
                 t.revealed = true;

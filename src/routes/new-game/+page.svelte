@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { Games } from "$lib/Games";
+    import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
     function start(e: any) {
         const difficulty = e.target.difficulty.value;
@@ -10,6 +11,12 @@
 
         Games.set_current_game(game.id);
         goto("/game");
+    }
+
+    function change() {
+        Haptics.impact({
+            style: ImpactStyle.Light,
+        });
     }
 </script>
 
@@ -38,6 +45,7 @@
                         class="radio checked:bg-lime-500"
                         checked
                         value="0"
+                        on:change
                     />
                 </label>
             </div>
@@ -49,6 +57,7 @@
                         name="difficulty"
                         class="radio checked:bg-amber-500"
                         value="1"
+                        on:change
                     />
                 </label>
             </div>
@@ -60,6 +69,7 @@
                         name="difficulty"
                         class="radio checked:bg-red-500"
                         value="2"
+                        on:change
                     />
                 </label>
             </div>
