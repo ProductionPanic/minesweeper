@@ -1,4 +1,4 @@
-export type GameSection = any[][];
+export type GameSection = string[];
 
 export interface Game {
     difficulty: number;

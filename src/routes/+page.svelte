@@ -22,7 +22,7 @@
                 </a>
                 <a class="btn btn-primary btn-outline btn-block" href="/game">
                     Continue last game
-                </a>
+                </a> 
             </div>
             <a class="btn btn-neutral btn-block" href="/settings"> Settings </a>
         </div>

@@ -8,7 +8,7 @@
 
         const game = Games.create_game(parsed);
 
-        Games.set_current_game(game);
+        Games.set_current_game(game.id);
         goto("/game");
     }
 </script>

@@ -1,4 +1,4 @@
-const difficultyMap = {
+export const difficultyMap = {
     0: {
         bombRatio: 0.1,
     },
@@ -22,72 +22,139 @@ export enum GameState {
 const block_width = 32;
 
 export class Board {
-    public width: number;
-    public height: number;
-    public tiles: Tile[];
-    public bombs: Tile[];
-    public revealed: Tile[];
-    public flagged: Tile[];
-    public state: GameState;
-    public time: number;
+    public tiles: Tile[] = [];
     public difficulty: keyof typeof difficultyMap;
-    public id: string;
+    public state: GameState;
+    public rowCount: number;
+    public columnCount: number;
+    public paddingX: number = 25;
+    public paddingY: number = 100;
 
-    constructor(difficulty: keyof typeof difficultyMap) {
-        const { width, height } = Board.calculate_dimensions();
-        this.width = width;
-        this.height = height;
-        this.tiles = [];
-        this.bombs = [];
-        this.revealed = [];
-        this.flagged = [];
-        this.state = GameState.Initialising;
-        this.time = 0;
+    constructor(difficulty: keyof typeof difficultyMap, bombs: string[] = [], revealed: string[] = [], flagged: string[] = []) {
         this.difficulty = difficulty;
-        this.id = Board.uuidv4();
+        this.state = GameState.Initialising;
 
-        this.generate_tiles();
-        this.pick_bombs();
+        this.rowCount = Math.floor((window.innerHeight - this.paddingY) / block_width);
+        this.columnCount = Math.floor((window.innerWidth - this.paddingX) / block_width);        
+        
+        if(bombs.length === 0) {
+            bombs = this.insert_bombs();
+        }
+            
+        this.generate_tiles(bombs,revealed,flagged);
+        this.add_counts();
+
     }
 
-    private generate_tiles() {
-        const total_tiles = this.width * this.height;
-        for (let i = 0; i < total_tiles; i++) {
-            const x = i % this.width;
-            const y = Math.floor(i / this.width);
-            const tile = new Tile(x, y);
+    private insert_bombs() {
+        const total_amount = this.rowCount * this.columnCount;
+        const bomb_amount = Math.floor(total_amount * difficultyMap[this.difficulty].bombRatio);
+        const bombs: string[] = [];
+        for (let i = 0; i < bomb_amount; i++) {
+            const x = Math.floor(Math.random() * this.columnCount);
+            const y = Math.floor(Math.random() * this.rowCount);
+            const coords = `${x},${y}`;
+            if (bombs.includes(coords)) {
+                i--;
+                continue;
+            }
+            bombs.push(coords);
+        }
+        return bombs;
+    }
+
+    private generate_tiles(bombs: string[], revealed: string[], flagged: string[]) {
+        const total_amount = this.rowCount * this.columnCount;
+        for (let i = 0; i < total_amount; i++) {
+            const x = i % this.columnCount;
+            const y = Math.floor(i / this.columnCount);
+            const coords=`${x},${y}`
+            const is_bomb = bombs.includes(coords);
+            const is_revealed = revealed.includes(coords);
+            const is_flagged = flagged.includes(coords);
+            const tile = new Tile(x, y, is_bomb, is_flagged, is_revealed);
             this.tiles.push(tile);
         }
     }
 
-    private pick_bombs() {
-        const { bombRatio } = difficultyMap[this.difficulty];
-        const total_bombs = Math.floor(this.tiles.length * bombRatio);
-        const bomb_tiles = this.tiles.sort(() => Math.random() - Math.random()).slice(0, total_bombs);
-        bomb_tiles.forEach((tile) => {
+    private add_counts() {
+        this.tiles.forEach((tile) => {
+            const adjacent_tiles = this.get_adjacent_tiles(tile.x, tile.y);
+            const adjacent_bombs = adjacent_tiles.filter((t) => t.bomb).length;
+            tile.adjacent_bombs = adjacent_bombs;
+        });
+    }
 
-    public static uuidv4() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                const r = (Math.random() * 16) | 0,
-                    v = c == 'x' ? r : (r & 0x3) | 0x8;
-                return v.toString(16);
-            });
-        }
+    public get_tile(x: number, y: number) {
+        const index = this.coord_to_index(x, y);
+        return this.tiles[index];
+    }
 
-    public static calculate_dimensions() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
+    public get_adjacent_tiles(x: number, y: number) {
+        const adjacent_tiles: Tile[] = [];
+        const adjacent_coords = [
+            [x - 1, y - 1],
+            [x, y - 1],
+            [x + 1, y - 1],
+            
+            [x - 1, y],
+            [x + 1, y],
+            
+            [x - 1, y + 1],
+            [x, y + 1],
+            [x + 1, y + 1],
+        ];
 
-            const block_width = 32;
-
-            const width_blocks = Math.floor(width / block_width);
-            const height_blocks = Math.floor(height / block_width);
-
-            return {
-                width: width_blocks,
-                height: height_blocks,
+        adjacent_coords.forEach(([x, y]) => {
+            if (x < 0 || x >= this.columnCount) {
+                return;
             }
+            if (y < 0 || y >= this.rowCount) {
+                return;
+            }
+            const tile = this.get_tile(x, y);
+            adjacent_tiles.push(tile);
+        });
+
+        return adjacent_tiles;
+    }
+
+    private coord_to_index(x: number, y: number) {
+        return x + (y * this.columnCount);
+    }
+
+
+    flag(tile: Tile) {
+        tile.flagged = !tile.flagged;
+        this.checkWon();
+    }
+
+    reveal(tile: Tile) {
+        if (tile.flagged) {
+            return;
         }
+        if (tile.revealed) {
+            return;
+        }
+        tile.revealed = true;
+        if (tile.bomb) {
+            this.state = GameState.Lost;
+            return;
+        }
+        if (tile.number === 0) {
+            const adjacent_tiles = this.get_adjacent_tiles(tile.x, tile.y);
+            adjacent_tiles.forEach((t) => !t.revealed && this.reveal(t));
+        }
+        this.checkWon();
+    }
+
+    checkWon() {
+        const unflagged_bombs = this.tiles.filter((t) => t.bomb && !t.flagged).length;
+        const unflagged_tiles = this.tiles.filter((t) => !t.revealed).length;
+        if (unflagged_bombs === 0 && unflagged_tiles === 0) {
+            this.state = GameState.Won;
+        }
+    }   
 }
 
 export class Tile {
@@ -96,11 +163,15 @@ export class Tile {
     public bomb: boolean = false;
     public flagged: boolean = false;
     public revealed: boolean = false;
-    public adjacent_bombs: number | null = null;
+    public number: number | null = null;
 
     constructor(x: number, y: number, bomb: boolean = false, flagged: boolean = false, revealed: boolean = false, adjacent_bombs: number | null = null) {
         this.x = x;
         this.y = y;
+        this.bomb = bomb;
+        this.flagged = flagged;
+        this.revealed = revealed;
+        this.number = adjacent_bombs;
     }
 
     public static from_json(json: any) {

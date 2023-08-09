@@ -1,40 +1,63 @@
 <script lang="ts">
+    import { createEventDispatcher } from 'svelte';
+
     export let bomb: boolean = false;
-    export let flag: boolean = false;
+    export let flagged: boolean = false;
     export let number: number = 0;
     export let revealed: boolean = false;
-    export const x: number = 0;
-    export const y: number = 0;
     export let size: number = 32;
+
+    const dispatch = createEventDispatcher();
+
+    let _mousedown = false;
+    let _mousedown_timeout: NodeJS.Timeout;
+
+    function mousedown() {
+        _mousedown = true;
+        _mousedown_timeout = setTimeout(() => {
+            _mousedown = false;
+        }, 500);
+    }
+
+    function mouseup() {
+        console.log(_mousedown ? 'click': 'long press   ')
+        if (_mousedown) {
+            dispatch('reveal');
+        } else {
+            dispatch('flag');
+        }
+
+        _mousedown = false;
+    }
+    
 </script>
 
-<div class="tile" style="--size:{size}">
+<button 
+class="tile" 
+style="--size:{size}" 
+on:pointerdown={mousedown} 
+on:pointerup={mouseup}
+on:contextmenu={e => e.preventDefault()}
+class:revealed
+class:flagged
+class:bomb
+>
     <div class="tile-content">
         {#if revealed}
             {#if bomb}
                 <div class="bomb">
-                    <svg class="w-10 h-10" viewBox="0 0 24 24">
-                        <path
-                            fill="currentColor"
-                            d="M12 2L2 12h3v8h14v-8h3L12 2zm0 3.5l5 5.5h-3v5h-4v-5H7l5-5.5zM12 8a1 1 0 110 2 1 1 0 010-2z"
-                        />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M459.1 52.4L442.6 6.5C440.7 2.6 436.5 0 432.1 0s-8.5 2.6-10.4 6.5L405.2 52.4l-46 16.8c-4.3 1.6-7.3 5.9-7.2 10.4c0 4.5 3 8.7 7.2 10.2l45.7 16.8 16.8 45.8c1.5 4.4 5.8 7.5 10.4 7.5s8.9-3.1 10.4-7.5l16.5-45.8 45.7-16.8c4.2-1.5 7.2-5.7 7.2-10.2c0-4.6-3-8.9-7.2-10.4L459.1 52.4zm-132.4 53c-12.5-12.5-32.8-12.5-45.3 0l-2.9 2.9C256.5 100.3 232.7 96 208 96C93.1 96 0 189.1 0 304S93.1 512 208 512s208-93.1 208-208c0-24.7-4.3-48.5-12.2-70.5l2.9-2.9c12.5-12.5 12.5-32.8 0-45.3l-80-80zM200 192c-57.4 0-104 46.6-104 104v8c0 8.8-7.2 16-16 16s-16-7.2-16-16v-8c0-75.1 60.9-136 136-136h8c8.8 0 16 7.2 16 16s-7.2 16-16 16h-8z"/></svg>
                 </div>
             {:else if number > 0}
                 <div class="number">{number}</div>
             {/if}
-        {:else if flag}
+        {:else if flagged}
             <div class="flag">
-                <svg class="w-10 h-10" viewBox="0 0 24 24">
-                    <path
-                        fill="currentColor"
-                        d="M12 2L2 12h3v8h14v-8h3L12 2zm0 3.5l5 5.5h-3v5h-4v-5H7l5-5.5zM12 8a1 1 0 110 2 1 1 0 010-2z"
-                    />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32V64 368 480c0 17.7 14.3 32 32 32s32-14.3 32-32V352l64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48V32z"/></svg>
             </div>
         {/if}
     </div>
-</div>
+</button>
 
 <style lang="scss">
     .tile {
@@ -49,17 +72,22 @@
 
         width: var(--size);
         height: var(--size);
+
+        &.revealed {
+            @apply bg-gray-900
+        }
+        &.revealed.bomb {
+            @apply bg-red-600;
+        }
+        &.flagged {
+            @apply bg-gray-600;
+        }
     }
 
     .tile-content {
         @apply flex items-center justify-center;
         @apply w-full h-full;
     }
-
-    .tile:hover {
-        @apply bg-gray-800;
-    }
-
     .tile:active {
         @apply bg-gray-900;
     }
@@ -81,6 +109,6 @@
     }
 
     .tile .flag svg {
-        @apply text-red-500;
+        fill: theme('colors.white');
     }
 </style>
