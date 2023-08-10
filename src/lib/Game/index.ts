@@ -12,7 +12,8 @@ export interface TileData {
     y: number,
     isMine: boolean,
     isFlagged: boolean,
-    isRevealed: boolean
+    isRevealed: boolean,
+    isExploded?: boolean,
 }
 
 export enum GameState {
@@ -64,11 +65,14 @@ class MineSweeperHandler {
 
     static setCurrentGameData(game: MineSweeperData) {
         localStorage.setItem('current_game', JSON.stringify(game));
+        this.newGame();
     }
 
     static clearCurrentGameData() {
         localStorage.removeItem('current_game');
     }
+
+
 
 }
 
@@ -130,4 +134,15 @@ export function new_minesweeper_game(difficulty: Difficulty) {
     MineSweeperHandler.setCurrentGameData(game);
 
     return game;
+}
+
+export function save_minesweeper_game(game: MineSweeperData) {
+    MineSweeperHandler.setCurrentGameData(game);
+}
+
+export function set_last_as_current_game() {
+    const game = MineSweeperHandler.getCurrentGameData();
+    if (game) {
+        MineSweeperHandler.setCurrentGameData(game);
+    }
 }

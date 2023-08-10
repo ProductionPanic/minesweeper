@@ -1,15 +1,12 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+    import { new_minesweeper_game } from "$lib/Game";
     import { Games } from "$lib/Games";
     import { Vibrate } from "$lib/Vibrate";
 
     function start(e: any) {
         const difficulty = e.target.difficulty.value;
-        const parsed = difficulty ? parseInt(difficulty) : 0;
-
-        const game = Games.create_game(parsed);
-
-        Games.set_current_game(game.id);
+        new_minesweeper_game(difficulty);
         goto("/game");
     }
 

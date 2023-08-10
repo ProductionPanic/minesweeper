@@ -1,7 +1,9 @@
 import { writable } from "svelte/store";
-import { GameState, type MineSweeperData, type TileData } from ".";
+import { GameState, save_minesweeper_game, type MineSweeperData, type TileData } from ".";
 
-const mineFieldTiles = writable<null | TileData[]>(null);
+export const mineFieldTiles = writable<TileData[]>([]);
+export const mineFieldGame = writable<null | MineSweeperData>(null);
+export const mineField = writable<null | MineField>(null);
 
 export class MineField {
     private game: MineSweeperData;
@@ -15,7 +17,11 @@ export class MineField {
     }
 
     private update_stores() {
+        console.log(this.game)
+        if (!this.game) return;
         mineFieldTiles.set(this.game.tiles);
+        mineFieldGame.set(this.game);
+        mineField.set(this);
         this.checkIfWon();
     }
 
@@ -89,5 +95,10 @@ export class MineField {
             this.game.state = GameState.Won;
             await this.reveal_all();
         }
+    }
+
+    public async pause_and_save() {
+        this.game.state = GameState.Paused;
+        save_minesweeper_game(this.game);
     }
 }

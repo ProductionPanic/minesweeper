@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Games, type Game } from "$lib/Games";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import TileElement from "./Tile.svelte";
     import TopBar from "./TopBar.svelte";
     import { goto } from "$app/navigation";
@@ -15,75 +15,61 @@
     } from "$lib/Board";
     import { Vibrate } from "$lib/Vibrate";
     import StateDisplay from "./StateDisplay.svelte";
-
-    const block_width = 32;
-
-    let row_count = 0;
-    let col_count = 0;
-
-    let board: Board;
-    let game: Game;
-
+    import { mineFieldGame, mineField, mineFieldTiles } from "$lib/Game/Field";
+    import {
+        TILE_SIZE,
+        set_last_as_current_game,
+        type TileData,
+    } from "$lib/Game";
     let field: HTMLDivElement;
-    let tiles: {
-        x: number;
-        y: number;
-        bomb: boolean;
-        flagged: boolean;
-        revealed: boolean;
-        bombCount: number;
-    }[] = [];
 
     onMount(() => {
-        game = Games.get_current_game();
+        const game = $mineFieldGame;
         if (!game) {
+            set_last_as_current_game();
             goto("/");
             return;
         }
-        board = new Board(
-            game.difficulty as keyof typeof difficultyMap,
-            game.bombs,
-            game.revealed,
-            game.flagged
-        );
 
-        field.style.width = `${board.columnCount * block_width}px`;
-        field.style.height = `${board.rowCount * block_width}px`;
-        field.style.gridTemplateColumns = `repeat(${board.columnCount}, 1fr)`;
-        field.style.gridTemplateRows = `repeat(${board.rowCount}, 1fr)`;
+        field.style.width = `${game.width * TILE_SIZE}px`;
+        field.style.height = `${game.height * TILE_SIZE}px`;
+        field.style.gridTemplateColumns = `repeat(${game.width}, 1fr)`;
+        field.style.gridTemplateRows = `repeat(${game.height}, 1fr)`;
     });
 
     function pause_and_quit() {
         goto("/");
     }
 
-    function flag(tile: Tile) {
-        board.flag(tile);
-        board.tiles = [...board.tiles];
+    function flag(tile: TileData) {
+        $mineField?.flag(tile);
         Vibrate.medium();
     }
 
-    function reveal(tile: Tile) {
-        board.reveal(tile);
-        board.tiles = [...board.tiles];
+    function reveal(tile: TileData) {
+        $mineField?.reveal(tile);
         Vibrate.small();
     }
+
+    onDestroy(() => {
+        $mineField?.pause_and_save();
+    });
 </script>
 
 <div class="field-container">
     <TopBar bind:time={$gameTimer} on:leave={pause_and_quit} />
     <div class="field" bind:this={field}>
-        {#if board}
-            {#each $curBoardTiles as tile}
+        {#if $mineField}
+            {#each $mineFieldTiles as tile}
                 <TileElement
-                    flagged={tile.flagged}
-                    bomb={tile.bomb}
-                    number={tile.number ?? 0}
-                    revealed={tile.revealed}
+                    flagged={tile.isFlagged}
+                    bomb={tile.isMine}
+                    number={$mineField.get_neighbour_mines(tile)}
+                    revealed={tile.isRevealed}
                     on:flag={() => flag(tile)}
                     on:reveal={() => reveal(tile)}
-                    size={block_width}
-                    exploded={tile.exploded}
+                    size={TILE_SIZE}
+                    exploded={tile.isExploded}
                 />
             {/each}
         {/if}
