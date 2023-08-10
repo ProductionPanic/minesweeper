@@ -1,5 +1,6 @@
 import { writable } from "svelte/store";
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Vibrate } from "./Vibrate";
+import type { Game } from "./Games";
 
 export const difficultyMap = {
     0: {
@@ -25,6 +26,7 @@ export enum GameState {
 const block_width = 32;
 
 export const curBoardTiles = writable<Tile[]>([]);
+export const state = writable<GameState>(GameState.Initialising);
 export const gameTimer = writable<number>(0);
 
 class Timer {
@@ -60,7 +62,7 @@ class Timer {
 export class Board {
     public tiles: Tile[] = [];
     public difficulty: keyof typeof difficultyMap;
-    public state: GameState;
+    public state!: GameState;
     public rowCount: number;
     public columnCount: number;
     public paddingX: number = 25;
@@ -68,7 +70,7 @@ export class Board {
 
     constructor(difficulty: keyof typeof difficultyMap, bombs: string[] = [], revealed: string[] = [], flagged: string[] = []) {
         this.difficulty = difficulty;
-        this.state = GameState.Initialising;
+        this.setState(GameState.Initialising)
 
         this.rowCount = Math.floor((window.innerHeight - this.paddingY) / block_width);
         this.columnCount = Math.floor((window.innerWidth - this.paddingX) / block_width);
@@ -179,7 +181,7 @@ export class Board {
         }
         tile.revealed = true;
         if (tile.bomb) {
-            this.state = GameState.Lost;
+            this.setState(GameState.Lost);
             Timer.pause();
             tile.exploded = true;
 
@@ -223,7 +225,7 @@ export class Board {
                 if (!t.exploded) {
                     tiles_left--;
                     if (t.bomb) {
-                        Haptics.impact({ style: ImpactStyle.Heavy });
+                        Vibrate.large();
                     }
                 }
                 t.exploded = true;
@@ -246,10 +248,13 @@ export class Board {
     }
 
     checkWon() {
-        const unflagged_bombs = this.tiles.filter((t) => t.bomb && !t.flagged).length;
-        const unflagged_tiles = this.tiles.filter((t) => !t.revealed).length;
-        if (unflagged_bombs === 0 && unflagged_tiles === 0) {
-            this.state = GameState.Won;
+        const non_bombs = this.tiles.filter((t) => !t.bomb);
+        const bombs = this.tiles.filter((t) => t.bomb);
+
+        const all_non_bombs_revealed = non_bombs.every((t) => t.revealed);
+        const no_bombs_revealed = bombs.every((t) => !t.revealed);
+        if (all_non_bombs_revealed && no_bombs_revealed) {
+            this.setState(GameState.Won);
             Timer.pause();
         }
 
@@ -258,6 +263,11 @@ export class Board {
 
     updateStore() {
         curBoardTiles.set(this.tiles);
+    }
+
+    setState(_state: GameState) {
+        this.state = _state;
+        state.set(_state);
     }
 }
 

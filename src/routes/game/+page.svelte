@@ -4,7 +4,6 @@
     import TileElement from "./Tile.svelte";
     import TopBar from "./TopBar.svelte";
     import { goto } from "$app/navigation";
-    import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
     import {
         Board,
@@ -14,6 +13,8 @@
         difficultyMap,
         gameTimer,
     } from "$lib/Board";
+    import { Vibrate } from "$lib/Vibrate";
+    import StateDisplay from "./StateDisplay.svelte";
 
     const block_width = 32;
 
@@ -59,13 +60,13 @@
     function flag(tile: Tile) {
         board.flag(tile);
         board.tiles = [...board.tiles];
-        Haptics.impact({ style: ImpactStyle.Medium });
+        Vibrate.medium();
     }
 
     function reveal(tile: Tile) {
         board.reveal(tile);
         board.tiles = [...board.tiles];
-        Haptics.impact({ style: ImpactStyle.Light });
+        Vibrate.small();
     }
 </script>
 
@@ -88,6 +89,8 @@
         {/if}
     </div>
 </div>
+
+<StateDisplay />
 
 <style lang="scss">
     .field {

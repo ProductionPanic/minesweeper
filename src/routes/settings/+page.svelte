@@ -1,7 +1,8 @@
 <script lang="ts">
     import { settings, updateSettings, type Settings } from "$lib/settings";
     import { onMount } from "svelte";
-    import { Haptics, ImpactStyle } from "@capacitor/haptics";
+    import { Vibrate } from "$lib/Vibrate";
+    import { goto } from "$app/navigation";
 
     let set: Settings;
 
@@ -13,10 +14,12 @@
 
     function save() {
         updateSettings(set);
+        Vibrate.small();
+        goto("/");
     }
 
     function change() {
-        Haptics.impact({ style: ImpactStyle.Light });
+        Vibrate.small();
     }
 </script>
 
@@ -37,6 +40,17 @@
     {#if set}
         <div class="settings-part">
             <div class="inputs">
+                <div class="form-control w-full">
+                    <label class="cursor-pointer label">
+                        <span class="label-text">Use vibrations</span>
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-primary"
+                            bind:checked={set.vibration}
+                            on:change={change}
+                        />
+                    </label>
+                </div>
                 <div class="form-control w-full">
                     <label class="cursor-pointer label">
                         <span class="label-text">Show emoji rain</span>

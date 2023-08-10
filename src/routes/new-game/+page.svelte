@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { Games } from "$lib/Games";
-    import { Haptics, ImpactStyle } from "@capacitor/haptics";
+    import { Vibrate } from "$lib/Vibrate";
 
     function start(e: any) {
         const difficulty = e.target.difficulty.value;
@@ -14,9 +14,7 @@
     }
 
     function change() {
-        Haptics.impact({
-            style: ImpactStyle.Light,
-        });
+        Vibrate.small();
     }
 </script>
 

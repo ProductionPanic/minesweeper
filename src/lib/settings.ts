@@ -3,11 +3,13 @@ import { writable, type Writable } from "svelte/store";
 export interface Settings {
     emojirain: boolean;
     emojirainCount: number;
+    vibration: boolean;
 }
 
 const defaultSettings: Settings = {
     emojirain: true,
     emojirainCount: 75,
+    vibration: true,
 };
 
 function settingsStore(): Writable<Settings> {
