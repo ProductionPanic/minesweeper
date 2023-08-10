@@ -3,7 +3,9 @@
     import { page } from "$app/stores";
 
     let showEmojiRain = true;
-    $: showEmojiRain = $page.url.pathname !== "/game";
+
+    const blacklist = new RegExp("^(\\/game|\\/play)");
+    $: showEmojiRain = !blacklist.test($page.url.pathname);
 </script>
 
 {#if showEmojiRain}
