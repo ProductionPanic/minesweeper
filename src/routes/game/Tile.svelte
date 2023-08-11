@@ -1,12 +1,14 @@
 <script lang="ts">
+    import type { TileData } from "$lib/Game";
+    import { mineField } from "$lib/Game/Field";
     import { createEventDispatcher } from "svelte";
 
-    export let bomb: boolean = false;
-    export let flagged: boolean = false;
-    export let number: number = 0;
-    export let revealed: boolean = false;
+    export let tile: TileData;
     export let size: number = 32;
     export let exploded: boolean = false;
+    let number: number=0;
+
+    $:number=$mineField?.get_neighbour_mines(tile) || 0;
 
     const dispatch = createEventDispatcher();
 
@@ -14,9 +16,8 @@
     let _mousedown_timeout: NodeJS.Timeout;
 
     let prev: any = null;
-    $: if (prev !== exploded && bomb) {
+    $: if (prev !== exploded && tile.isMine) {
         prev = exploded;
-        navigator.vibrate([100, 100, 100]);
     }
 
     function mousedown() {
@@ -29,7 +30,7 @@
     }
 
     function mouseup() {
-        if (_mousedown && !flagged) {
+        if (_mousedown && !tile.isFlagged) {
             dispatch("reveal");
         }
         _mousedown = false;
@@ -42,14 +43,14 @@
     on:pointerdown={mousedown}
     on:pointerup={mouseup}
     on:contextmenu={(e) => e.preventDefault()}
-    class:revealed
-    class:flagged
-    class:bomb
-    class:exploded
+    class:revealed={tile.isRevealed}
+    class:flagged={tile.isFlagged}
+    class:bomb={tile.isMine}
+    class:exploded={exploded}
 >
     <div class="tile-content">
-        {#if revealed}
-            {#if bomb}
+        {#if tile.isRevealed}
+            {#if tile.isMine}
                 <div class="bomb">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +64,7 @@
             {:else if number > 0}
                 <div class="number">{number}</div>
             {/if}
-        {:else if flagged}
+        {:else if tile.isFlagged}
             <div class="flag">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

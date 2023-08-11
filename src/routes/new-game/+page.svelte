@@ -1,14 +1,19 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    import { new_minesweeper_game } from "$lib/Game";
-    import { Games } from "$lib/Games";
+    import { goto, invalidateAll } from "$app/navigation";
+    import { GameState, new_minesweeper_game} from "$lib/Game";
+    import { MineField, mineField, mineFieldState, mineFieldTiles, reset_all } from "$lib/Game/Field";
     import { Vibrate } from "$lib/Vibrate";
+    import { onMount, tick } from "svelte";
 
-    function start(e: any) {
+    async function start(e: any) {;
+        reset_all();
+        await tick();
         const difficulty = e.target.difficulty.value;
-        new_minesweeper_game(difficulty);
+        await new_minesweeper_game(difficulty);
+        await tick();
         goto("/game");
     }
+
 
     function change() {
         Vibrate.small();

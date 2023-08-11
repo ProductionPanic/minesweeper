@@ -1,5 +1,11 @@
 <script lang="ts">
-    import Animations from "$lib/components/EmojiBackground.svelte";
+    import { reset_all } from "$lib/Game/Field";
+    import { onMount } from "svelte";
+
+    onMount(() => {
+        
+    reset_all();
+    })
 </script>
 
 <div class="hero mx-4 rounded-md mt-8">

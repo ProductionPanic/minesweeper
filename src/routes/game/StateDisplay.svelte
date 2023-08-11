@@ -1,22 +1,25 @@
 <script lang="ts">
-    import { GameState, gameTimer, state } from "$lib/Board";
+    import  { GameState, clear_current_game,  } from "$lib/Game";
+    import { Timer, mineFieldState, timer } from "$lib/Game/Field";
     import { onMount } from "svelte";
 
     let _state: GameState;
     let dialog: HTMLDialogElement;
 
-    $: if (_state !== $state && dialog) {
+    $: if (_state !== $mineFieldState && dialog && $mineFieldState) {
         dialog.showModal();
-        _state = $state;
+        _state = $mineFieldState;
+        Timer.pause();
+        clear_current_game();
     }
 </script>
 
-{#if $state === GameState.Won}
+{#if $mineFieldState === GameState.Won}
     <dialog class="modal" bind:this={dialog}>
         <form method="dialog" class="modal-box">
             <h3 class="font-bold text-lg">Nice job!</h3>
             <p class="py-4">
-                You've won the game! And it only took you {$gameTimer}
+                You've won the game! And it only took you {$timer} seconds!
             </p>
             <div class="modal-action">
                 <!-- if there is a button in form, it will close the modal -->
@@ -29,7 +32,7 @@
         </form>
     </dialog>
 {/if}
-{#if $state === GameState.Lost}
+{#if $mineFieldState === GameState.Lost}
     <dialog class="modal" bind:this={dialog}>
         <form method="dialog" class="modal-box">
             <h3 class="font-bold text-lg">Oh no!</h3>

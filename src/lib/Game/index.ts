@@ -1,4 +1,5 @@
-import { MineField } from "./Field";
+import { tick } from "svelte";
+import { MineField, mineField } from "./Field";
 
 export interface MineSweeperData {
     tiles: TileData[];
@@ -13,16 +14,16 @@ export interface TileData {
     isMine: boolean,
     isFlagged: boolean,
     isRevealed: boolean,
-    isExploded?: boolean,
+    isExploded: boolean,
 }
 
 export enum GameState {
-    None,
-    Initialising,
-    Playing,
-    Paused,
-    Won,
-    Lost
+    None = 'none',
+    Initialising = 'initialising',
+    Playing = 'playing',
+    Paused = 'paused',
+    Won = 'won',
+    Lost = 'lost',
 }
 
 export enum Difficulty {
@@ -41,18 +42,34 @@ class MineSweeperHandler {
 
     private constructor() { }
 
-    private init() {
+    private async init() {
+
+        await tick();
         this.game = MineSweeperHandler.getCurrentGameData();
-        this.field = new MineField(this.game!);
-        this.field.init();
+        const field = new MineField(this.game!);
+        mineField.set(field);
+        await tick();
+        field.init();
+        await tick();      
+
     }
 
-    private static newGame() {
+    private async reset() {
+        this.game = null;
+        this.field = null;
+        await new Promise(resolve => setTimeout(resolve, 10));
+    }
+
+    public static async newGame() {
+        if (this.instance) {
+            await this.instance.reset();
+        }
+
         if (!this.instance) {
             this.instance = new MineSweeperHandler();
         }
 
-        this.instance.init();
+        await this.instance.init();
     }
 
     static getCurrentGameData(): MineSweeperData | null {
@@ -65,7 +82,6 @@ class MineSweeperHandler {
 
     static setCurrentGameData(game: MineSweeperData) {
         localStorage.setItem('current_game', JSON.stringify(game));
-        this.newGame();
     }
 
     static clearCurrentGameData() {
@@ -76,9 +92,10 @@ class MineSweeperHandler {
 
 }
 
-export function new_minesweeper_game(difficulty: Difficulty) {
+export async function new_minesweeper_game(difficulty: Difficulty) {
+    mineField.set(null);
+    
     MineSweeperHandler.clearCurrentGameData();
-
     let mineRatio = 0;
     switch (difficulty) {
         case Difficulty.Easy:
@@ -107,7 +124,8 @@ export function new_minesweeper_game(difficulty: Difficulty) {
             y: Math.floor(i / width),
             isMine: false,
             isFlagged: false,
-            isRevealed: false
+            isRevealed: false,
+            isExploded: false,
         }
     });
 
@@ -133,16 +151,27 @@ export function new_minesweeper_game(difficulty: Difficulty) {
 
     MineSweeperHandler.setCurrentGameData(game);
 
-    return game;
+    await MineSweeperHandler.newGame();
+
+    return MineSweeperHandler.getCurrentGameData();
 }
 
 export function save_minesweeper_game(game: MineSweeperData) {
     MineSweeperHandler.setCurrentGameData(game);
 }
 
+export async function init_game() {
+    await MineSweeperHandler.newGame();
+}
+
 export function set_last_as_current_game() {
     const game = MineSweeperHandler.getCurrentGameData();
-    if (game) {
+    
+    if (game && game.state !== GameState.Lost || game && game.state !== GameState.Won) {
         MineSweeperHandler.setCurrentGameData(game);
     }
+}
+
+export function clear_current_game() {
+    MineSweeperHandler.clearCurrentGameData();
 }

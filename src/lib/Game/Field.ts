@@ -4,25 +4,83 @@ import { GameState, save_minesweeper_game, type MineSweeperData, type TileData }
 export const mineFieldTiles = writable<TileData[]>([]);
 export const mineFieldGame = writable<null | MineSweeperData>(null);
 export const mineField = writable<null | MineField>(null);
+export const mineFieldState = writable<GameState|null>(null);
 
-export class MineField {
-    private game: MineSweeperData;
+export const timer = writable<number>(0);
 
-    constructor(game: MineSweeperData) {
-        this.game = game;
+export function reset_all() {
+    mineFieldTiles.set([]);
+    mineFieldGame.set(null);
+    mineField.set(null);
+    mineFieldState.set(null);
+    timer.set(0);
+}
+
+export class Timer {
+    private static interval: NodeJS.Timeout | null = null;
+
+    public static start() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+        this.interval = setInterval(() => {
+            timer.update(t => t + 1);
+        }, 1000);
     }
 
-    public init() {
+    public static running() {
+        return this.interval !== null;
+    }
+
+    public static stop() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+
+        this.reset();
+    }
+
+    public static reset() {
+        timer.set(0);
+    }
+
+    public static pause() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+    }
+
+    public static resume() {
+        this.start();
+    }
+
+
+}
+
+export class MineField {
+    public game: MineSweeperData;
+    private _won: boolean = false;
+
+    constructor(game: MineSweeperData) {        
+        this.game = game;
         this.update_stores();
     }
 
+    public init() {
+        
+    }
+
+    public static destroy() {
+        mineField.set(null);
+    }
+
     private update_stores() {
-        console.log(this.game)
-        if (!this.game) return;
         mineFieldTiles.set(this.game.tiles);
         mineFieldGame.set(this.game);
+        mineFieldState.set(this.game.state);
         mineField.set(this);
-        this.checkIfWon();
+        
+        !this._won && this.checkIfWon();
     }
 
     public get_neighbours(tile: TileData, radius: number = 1) {
@@ -51,40 +109,50 @@ export class MineField {
             await this.explode(tile);
         } else {
             if (this.get_neighbour_mines(tile) === 0) {
-                this.get_neighbours(tile).forEach(neighbour => {
+                const neighbours = this.get_neighbours(tile);
+                for (const neighbour of neighbours) {
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                    this.update_stores();
                     if (!neighbour.isRevealed) {
                         this.reveal(neighbour);
                     }
-                });
+                }
             }
         }
         this.update_stores();
+        this.save();
+        if(!Timer.running()) Timer.start();
     }
 
     public flag(tile: TileData) {
         tile.isFlagged = !tile.isFlagged;
         this.update_stores();
+        this.save();
+        if(!Timer.running()) Timer.start();
     }
 
     public async explode(tile: TileData) {
-        const max_dimension = Math.max(this.game.width, this.game.height);
+        if(Timer.running()) Timer.pause();
         let r = 1;
         while (true) {
             const neighbours = this.get_neighbours(tile, r);
             if (neighbours.length === 0) break;
             for (const neighbour of neighbours) {
                 neighbour.isRevealed = true;
+                neighbour.isExploded = true;
             }
             r++;
+            this.update_stores();
             await new Promise(resolve => setTimeout(resolve, 100));
         }
+        this.game.state = GameState.Lost;
+        this.update_stores();
     }
 
     public async reveal_all() {
         for (const tile of this.game.tiles) {
             tile.isRevealed = true;
             this.update_stores();
-            await new Promise(resolve => setTimeout(resolve, 10));
         }
     }
 
@@ -93,12 +161,30 @@ export class MineField {
         const bomb_check = this.game.tiles.filter(tile => tile.isMine).every(tile => tile.isFlagged);
         if (non_bombs_check && bomb_check) {
             this.game.state = GameState.Won;
-            await this.reveal_all();
+            this._won = true;
+            this.update_stores();
+
         }
+        
     }
 
     public async pause_and_save() {
         this.game.state = GameState.Paused;
+        Timer.pause();
         save_minesweeper_game(this.game);
+    }
+
+    public save() {
+        save_minesweeper_game(this.game);
+    }
+
+    public static reset() {
+        console.log("resetting");
+        
+        mineFieldTiles.set([]);
+        mineFieldGame.set(null);
+        mineFieldState.set(GameState.Initialising);
+        mineField.set(null);
+        timer.set(0);
     }
 }
