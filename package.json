@@ -28,15 +28,18 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@capacitor-community/sqlite": "5.0.7-2",
 		"@capacitor/android": "^5.2.2",
 		"@capacitor/cli": "^5.2.2",
 		"@capacitor/core": "^5.2.2",
 		"@capacitor/haptics": "^5.0.6",
+		"@capacitor/preferences": "^5.0.6",
 		"@capacitor/splash-screen": "^5.0.6",
 		"@lottiefiles/svelte-lottie-player": "^0.3.0",
 		"@sveltejs/adapter-static": "^2.0.3",
 		"@types/p5": "^1.6.2",
 		"gsap": "^3.12.2",
+		"jeep-sqlite": "^2.4.1",
 		"p5": "^1.7.0"
 	}
 }

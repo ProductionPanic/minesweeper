@@ -6,9 +6,9 @@
     export let tile: TileData;
     export let size: number = 32;
     export let exploded: boolean = false;
-    let number: number=0;
+    let number: number = 0;
 
-    $:number=$mineField?.get_neighbour_mines(tile) || 0;
+    $: number = $mineField?.get_neighbour_mines(tile) || 0;
 
     const dispatch = createEventDispatcher();
 
@@ -25,7 +25,7 @@
         _mousedown_timeout = setTimeout(() => {
             if (!_mousedown) return;
             _mousedown = false;
-            dispatch("flag");
+            !tile.isRevealed && dispatch("flag");
         }, 500);
     }
 
@@ -46,7 +46,7 @@
     class:revealed={tile.isRevealed}
     class:flagged={tile.isFlagged}
     class:bomb={tile.isMine}
-    class:exploded={exploded}
+    class:exploded
 >
     <div class="tile-content">
         {#if tile.isRevealed}

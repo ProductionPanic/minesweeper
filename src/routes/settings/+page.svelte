@@ -1,19 +1,17 @@
 <script lang="ts">
-    import { settings, updateSettings, type Settings } from "$lib/settings";
+    import { type Settings, SettingsHandler, settings } from "$lib/settings";
     import { onMount } from "svelte";
     import { Vibrate } from "$lib/Vibrate";
     import { goto } from "$app/navigation";
 
     let set: Settings;
 
-    onMount(() => {
-        settings.subscribe((value) => {
-            set = value;
-        });
+    onMount(async () => {
+        set = await SettingsHandler.get();
     });
 
     function save() {
-        updateSettings(set);
+        SettingsHandler.update(set);
         Vibrate.small();
         goto("/");
     }
@@ -57,7 +55,7 @@
                         <input
                             type="checkbox"
                             class="toggle toggle-primary"
-                            bind:checked={set.emojirain}
+                            bind:checked={$settings.emojirain}
                             on:change={change}
                         />
                     </label>
