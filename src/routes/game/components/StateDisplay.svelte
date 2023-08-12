@@ -1,14 +1,23 @@
 <script lang="ts">
     import { GameState, clear_current_game } from "$lib/Game";
-    import { Timer, mineFieldState, timer } from "$lib/Game/Field";
-    import { gameOver, gameStatus } from "$lib/Game/Game";
+    import { Timer, mineFieldState } from "$lib/Game/Field";
+    import { gameOver, gameStatus, tilesStore } from "$lib/Game/Game";
+    import { GameTimer } from "$lib/Game/GameTimer";
     import { sleep } from "$lib/Utils";
     import { onMount, tick } from "svelte";
 
     let _state: GameState;
     let dialog: HTMLDialogElement;
 
-    $: if ($gameOver) {
+    let timer = GameTimer.timer;
+
+    let lost:boolean;
+    $:lost = $tilesStore.every(i=>i.exploded);
+
+    let won:boolean;
+    $:won = $tilesStore.filter(i=>i.bomb).every(i=>i.flag) && $tilesStore.filter(i=>!i.bomb).every(i=>i.open);
+
+    $: if ($gameOver && (won||lost)) {
         gameoover();
     }
 

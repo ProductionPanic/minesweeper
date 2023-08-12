@@ -1,5 +1,5 @@
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
-import { settings } from "./settings";
+import { settings } from "./data/settings";
 
 export class Vibrate {
     private static async shouldVibrate() {

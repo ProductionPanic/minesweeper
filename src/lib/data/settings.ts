@@ -7,13 +7,17 @@ export interface Settings {
     emojirainCount: number;
     vibration: boolean;
     visited: boolean|undefined;
+    lastDifficulty: number;
+    useSound: boolean;
 }
 
 const defaultSettings: Settings = {
     emojirain: true,
-    emojirainCount: 50,
+    emojirainCount: 30,
     vibration: true,
+    lastDifficulty: 0,
     visited: undefined,
+    useSound: true,
 };
 
 export const settings = writable<Settings>(defaultSettings);

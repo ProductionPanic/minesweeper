@@ -21,3 +21,9 @@
 {#if loaded && field}
     <MineSweeper instance={field} />
 {/if}
+
+<style>
+    :root {
+        @apply bg-gray-900;
+    }
+</style>

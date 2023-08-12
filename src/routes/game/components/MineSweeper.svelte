@@ -18,16 +18,16 @@
     let started = false;
 
     onMount(() => {
-        GameTimer.time = instance.time;
         if (GameTimer.time > 0) {
-            GameTimer.start();
+            GameTimer.start(instance.time);
             started = true;
+        } else {
+            GameTimer.stop();
+            timer.set(0);
         }
     });
 
     $: if (instance && field) {
-        field.style.width = `${instance.width * TILE_SIZE}px`;
-        field.style.height = `${instance.height * TILE_SIZE}px`;
         field.style.gridTemplateColumns = `repeat(${instance.width}, ${TILE_SIZE}px)`;
         field.style.gridTemplateRows = `repeat(${instance.height}, ${TILE_SIZE}px)`;
     }
@@ -78,7 +78,7 @@
     .field {
         display: grid;
         user-select: none;
-        @apply bg-gray-900;
+        @apply bg-gray-900 shadow-xl;
     }
 
     .field-container {

@@ -92,6 +92,17 @@
                 </div>
                 <div class="form-control w-full">
                     <label class="cursor-pointer label">
+                        <span class="label-text">Use sound</span>
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-primary"
+                            bind:checked={set.useSound}
+                            on:change={change}
+                        />
+                    </label>
+                </div>
+                <div class="form-control w-full">
+                    <label class="cursor-pointer label">
                         <span class="label-text">Show emoji rain</span>
                         <input
                             type="checkbox"

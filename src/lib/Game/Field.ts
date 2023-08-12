@@ -81,6 +81,7 @@ export class MineField {
     }
 
     private update_stores() {
+        if(!this.game) return;
         mineFieldTiles.set(this.game.tiles);
         mineFieldGame.set(this.game);
         mineFieldState.set(this.game.state);

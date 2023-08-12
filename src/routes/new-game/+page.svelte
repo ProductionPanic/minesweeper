@@ -10,15 +10,15 @@
     } from "$lib/Game/Field";
     import { MinesweeperInstance } from "$lib/Game/Game";
     import { Vibrate } from "$lib/Vibrate";
+    import { SettingsHandler } from "$lib/data/settings";
     import { onMount, tick } from "svelte";
 
     async function start(e: any) { 
-        reset_all();
-        await tick();
         const difficulty = e.target.difficulty.value;
-        await new_minesweeper_game(difficulty);
+        SettingsHandler.update({
+            lastDifficulty: difficulty,
+        })
         await MinesweeperInstance.create(difficulty);
-        await tick();
         goto("/game");
     }
 

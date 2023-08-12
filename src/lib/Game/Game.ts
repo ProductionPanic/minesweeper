@@ -3,6 +3,7 @@ import { db, type MinesweeperGame, type MineSweeperTile } from "$lib/data/db"
 import { writable, type Writable } from "svelte/store"
 import { TILE_SIZE, type Difficulty, GameState } from "."
 import { GameTimer } from "./GameTimer"
+import { Sounds } from "$lib/Sounds"
 
 export const tilesStore: Writable<MineSweeperTile[]> = writable([])
 export const gameOver: Writable<boolean> = writable(false)
@@ -84,7 +85,7 @@ export class MinesweeperInstance {
                 bomb_ratio = 0.2;
                 break;
             case 2: // hard
-                bomb_ratio = 0.3;
+                bomb_ratio = 0.35;
                 break;
             default:
                 break;
@@ -149,6 +150,7 @@ export class MinesweeperInstance {
 
     public async reveal(tile: MineSweeperTile) {
         if (tile.open || tile.flag) return;
+        Sounds.pop();
         tile.open = true;
         if (tile.bomb) {
             this.status = 2;
@@ -175,26 +177,19 @@ export class MinesweeperInstance {
 
     public async flag(tile: MineSweeperTile) {
         if (tile.open) return;
+        Sounds.pop();
         tile.flag = !tile.flag;
         this.checkWin();
         this.update();
     }
 
     public async checkWin() {
-        let win = true;
-        for (let i = 0; i < this.tiles.length; i++) {
-            const tile = this.tiles[i];
-            if (tile.bomb && !tile.flag) {
-                win = false;
-                break;
-            }
-            if (!tile.bomb && !tile.open) {
-                win = false;
-                break;
-            }
-        }
-        if (win) {
+        const bombs_check = this.tiles.filter(tile => tile.bomb).every(tile => tile.flag);
+        const other_check = this.tiles.filter(tile => !tile.bomb).every(tile => tile.open);
+        if (bombs_check && other_check) {
             this.status = GameState.Won;
+            GameTimer.pause();
+            this.update();
         }
     }
 
@@ -233,7 +228,11 @@ export class MinesweeperInstance {
         tile.exploded = true;
         tile.open = true;
         this.update();
-        await sleep(10);
+        await sleep(5);
+        if(tile.bomb) {
+            
+        Sounds.pop();
+        }
         tile = this.tiles[index];
         const neighbours = this.getDirectNeighbours(tile);
         console.log(neighbours);
@@ -249,6 +248,8 @@ export class MinesweeperInstance {
     }
 
     public async explodeAnimation(startTile: MineSweeperTile) {
+        GameTimer.pause();
+        Sounds.pop();
         await sleep(400);
         await this.explode(startTile);
     }
