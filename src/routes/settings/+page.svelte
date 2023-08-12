@@ -3,6 +3,8 @@
     import { onMount } from "svelte";
     import { Vibrate } from "$lib/Vibrate";
     import { goto } from "$app/navigation";
+    import {db} from '$lib/db';
+    import { addAlert } from "$lib/Alerts";
 
     let set: Settings;
 
@@ -13,11 +15,32 @@
     function save() {
         SettingsHandler.update(set);
         Vibrate.small();
+        addAlert({
+            title: "Settings saved",
+            type: "success",
+        });
         goto("/");
     }
 
     function change() {
         Vibrate.small();
+    }
+
+    let deleteAllDialog: HTMLDialogElement;
+    function reset_all() {
+        deleteAllDialog.showModal();
+    }
+
+    function delete_all_response(e) {
+        deleteAllDialog.close();
+        if (e.submitter.value === "y") {
+            db.games.clear();
+            db.highscores.clear();
+            if(globalThis && globalThis.window && globalThis.window.localStorage) {
+                window.localStorage.clear();
+            }
+            goto("/");
+        }
     }
 </script>
 
@@ -60,7 +83,7 @@
                         />
                     </label>
                 </div>
-                {#if set.emojirain}
+                {#if $settings.emojirain}
                     <label
                         class="cursor-pointer label flex-col flex items-start w-full gap-2"
                     >
@@ -72,21 +95,38 @@
                             min="0"
                             max="75"
                             step="5"
-                            bind:value={set.emojirainCount}
+                            bind:value={$settings.emojirainCount}
                             on:change={change}
-                            class="range range-secondary"
+                            class="range range-primary"
                         />
                     </label>
                 {/if}
+                <button class="btn btn-error btn-outline btn-sm" on:click={reset_all}>
+                    Erease all data
+                </button>
             </div>
 
             <div class="buttons grid grid-cols-2 gap-4 w-full p-4">
-                <button class="btn btn-secondary" on:click={save}>Save</button>
-                <a class="btn btn-secondary btn-outline" href="/">Cancel</a>
+                <button class="btn btn-primary" on:click={save}>Save</button>
+                <a class="btn btn-primary btn-outline" href="/">Cancel</a>
             </div>
         </div>
     {/if}
 </div>
+
+<dialog class="modal" bind:this={deleteAllDialog}>
+    <form method="dialog" class="modal-box" on:submit|preventDefault={delete_all_response}>
+      <h3 class="font-bold text-lg">Wait a minute!</h3>
+      <p class="py-4">
+        Are you sure you want to delete all your data? This action can't be
+        undone.
+        </p>
+      <div class="modal-action">
+        <button class="btn btn-primary" type="submit" value="y">Yes</button>
+        <button class="btn btn-primary btn-outline" type="submit" value="n">No</button>
+      </div>
+    </form>
+  </dialog>
 
 <style lang="scss">
     .top-bar {

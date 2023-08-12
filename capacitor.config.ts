@@ -15,9 +15,6 @@ const config: CapacitorConfig = {
       useDialog: true,
       splashFullScreen: true,
       splashImmersive: true,
-    },
-    CapacitorSQLite: {
-
     }
   }
 };

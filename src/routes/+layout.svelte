@@ -1,6 +1,7 @@
 <script lang="ts">
     import EmojiBackground from "$lib/components/EmojiBackground.svelte";
     import { page } from "$app/stores";
+    import Alerts from "$lib/components/Alerts.svelte"
     import { SettingsHandler } from "$lib/settings";
 
     let showEmojiRain = true;
@@ -12,6 +13,8 @@
         SettingsHandler.init();
     }
 </script>
+
+<Alerts />
 
 <svelte:body on:load={loaded} />
 
