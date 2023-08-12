@@ -56,6 +56,7 @@
 
     function sound() {
         const audio = new Audio(sounds[Math.floor(Math.random() * sounds.length)]);
+        audio.volume = 0.1;
         audio.play();
     }
 </script>
