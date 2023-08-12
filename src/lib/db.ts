@@ -20,6 +20,13 @@ export interface MinesweeperGame {
     updated: number;
 }
 
+export interface Option {
+    key: string;
+    value: string;
+    created: number;
+    updated: number;
+}
+
 
 export interface MinesweeperHighscore {
     id?: number;
@@ -31,12 +38,14 @@ export interface MinesweeperHighscore {
 export class MinesweeperDatabase extends Dexie {
     games!: Table<MinesweeperGame>;
     highscores!: Table<MinesweeperHighscore>;
+    options!: Table<Option>;
 
     constructor() {
         super('MinesweeperDatabase');
         this.version(1).stores({
             games: '++id, name, tiles, width, height, time, status, created, updated',
-            highscores: '++id, name, time, created'
+            highscores: '++id, name, time, created',
+            options: 'key, value, created, updated',
         });
     }
 }
