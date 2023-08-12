@@ -1,9 +1,13 @@
 <script lang="ts">
-    import { type Settings, SettingsHandler, settings } from "$lib/data/settings";
+    import {
+        type Settings,
+        SettingsHandler,
+        settings,
+    } from "$lib/data/settings";
     import { onMount } from "svelte";
     import { Vibrate } from "$lib/Vibrate";
     import { goto } from "$app/navigation";
-    import {db} from '$lib/data/db';
+    import { db } from "$lib/data/db";
     import { addAlert } from "$lib/Alerts";
 
     let set: Settings;
@@ -20,7 +24,6 @@
             title: "Settings saved",
             type: "success",
         });
-        goto("/");
     }
 
     function change() {
@@ -39,10 +42,22 @@
             db.games.clear();
             db.highscores.clear();
             db.options.clear();
-            if(globalThis && globalThis.window && globalThis.window.localStorage) {
+            if (
+                globalThis &&
+                globalThis.window &&
+                globalThis.window.localStorage
+            ) {
                 window.localStorage.clear();
             }
-            goto("/");
+            addAlert(
+                {
+                    title: "All data deleted",
+                    type: "success",
+                },
+                3000,
+                true
+            );
+            window.location.reload();
         }
     }
 </script>
@@ -104,32 +119,41 @@
                         />
                     </label>
                 {/if}
-                <button class="btn btn-error btn-outline btn-sm" on:click={reset_all}>
+                <button
+                    class="btn btn-error btn-outline btn-sm"
+                    on:click={reset_all}
+                >
                     Erease all data
                 </button>
             </div>
 
             <div class="buttons grid grid-cols-2 gap-4 w-full p-4">
                 <button class="btn btn-primary" on:click={save}>Save</button>
-                <a class="btn btn-primary btn-outline" href="/">Cancel</a>
+                <a class="btn btn-primary btn-outline" href="/">back</a>
             </div>
         </div>
     {/if}
 </div>
 
 <dialog class="modal" bind:this={deleteAllDialog}>
-    <form method="dialog" class="modal-box" on:submit|preventDefault={delete_all_response}>
-      <h3 class="font-bold text-lg">Wait a minute!</h3>
-      <p class="py-4">
-        Are you sure you want to delete all your data? This action can't be
-        undone.
+    <form
+        method="dialog"
+        class="modal-box"
+        on:submit|preventDefault={delete_all_response}
+    >
+        <h3 class="font-bold text-lg">Wait a minute!</h3>
+        <p class="py-4">
+            Are you sure you want to delete all your data? This action can't be
+            undone.
         </p>
-      <div class="modal-action">
-        <button class="btn btn-primary" type="submit" value="y">Yes</button>
-        <button class="btn btn-primary btn-outline" type="submit" value="n">No</button>
-      </div>
+        <div class="modal-action">
+            <button class="btn btn-primary" type="submit" value="y">Yes</button>
+            <button class="btn btn-primary btn-outline" type="submit" value="n"
+                >No</button
+            >
+        </div>
     </form>
-  </dialog>
+</dialog>
 
 <style lang="scss">
     .top-bar {

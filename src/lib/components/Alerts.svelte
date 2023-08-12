@@ -1,16 +1,21 @@
 <script lang="ts">
-    import {  alerts } from "$lib/Alerts";
+    import { alerts, check } from "$lib/Alerts";
+    import { onMount } from "svelte";
     import Alert from "./Alert.svelte";
 
-    function deleteAction(alert:any) {
+    function deleteAction(alert: any) {
         alerts.update((a) => a.filter((x) => x !== alert));
     }
+
+    onMount(() => {
+        check();
+    });
 </script>
 
 <div class="global-alerts">
     {#each $alerts as alert}
-       <Alert bind:alert={alert} on:delete={() => deleteAction(alert)} />
-    {/each}    
+        <Alert bind:alert on:delete={() => deleteAction(alert)} />
+    {/each}
 </div>
 
 <style lang="scss">
@@ -27,5 +32,4 @@
         gap: 1rem;
         padding: 1rem;
     }
-
 </style>

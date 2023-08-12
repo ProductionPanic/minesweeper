@@ -4,32 +4,20 @@
     import { init_game } from "$lib/Game";
     import type { PageData } from "./$types";
     import { MinesweeperInstance } from "$lib/Game/Game";
-    import MineSweeperGameComponent from "./MineSweeperGameComponent.svelte";
+    import MineSweeper from "./components/MineSweeper.svelte";
 
     export let data: PageData;
 
-    $: console.log(data);
-
     let loaded = false;
-    let unsub;
+    let field: MinesweeperInstance | null = null;
     onMount(async () => {
         await init_game();
         loaded = true;
-        unsub = mineField.subscribe((val) => {
-            _mineField = val;
-        });
 
-        const test = await MinesweeperInstance.latest();
-        console.log('latest');
-        console.log(test);
-
+        field = await MinesweeperInstance.latest();
     });
-
-    let _mineField: MineField | null = null;
 </script>
 
-{#key mineField}
-    {#if loaded && _mineField}
-        <MineSweeperGameComponent mineField={_mineField} />
-    {/if}
-{/key}
+{#if loaded && field}
+    <MineSweeper instance={field} />
+{/if}

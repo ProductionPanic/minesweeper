@@ -18,12 +18,12 @@ export interface TileData {
 }
 
 export enum GameState {
-    None = 'none',
-    Initialising = 'initialising',
-    Playing = 'playing',
-    Paused = 'paused',
-    Won = 'won',
-    Lost = 'lost',
+    None,
+    Initialising,
+    Playing,
+    Paused,
+    Won,
+    Lost,
 }
 
 export enum Difficulty {
@@ -50,7 +50,7 @@ class MineSweeperHandler {
         mineField.set(field);
         await tick();
         field.init();
-        await tick();      
+        await tick();
 
     }
 
@@ -94,7 +94,7 @@ class MineSweeperHandler {
 
 export async function new_minesweeper_game(difficulty: Difficulty) {
     mineField.set(null);
-    
+
     MineSweeperHandler.clearCurrentGameData();
     let mineRatio = 0;
     switch (difficulty) {
@@ -166,7 +166,7 @@ export async function init_game() {
 
 export function set_last_as_current_game() {
     const game = MineSweeperHandler.getCurrentGameData();
-    
+
     if (game && game.state !== GameState.Lost || game && game.state !== GameState.Won) {
         MineSweeperHandler.setCurrentGameData(game);
     }

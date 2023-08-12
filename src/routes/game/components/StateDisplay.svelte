@@ -1,20 +1,24 @@
 <script lang="ts">
-    import  { GameState, clear_current_game,  } from "$lib/Game";
+    import { GameState, clear_current_game } from "$lib/Game";
     import { Timer, mineFieldState, timer } from "$lib/Game/Field";
-    import { onMount } from "svelte";
+    import { gameOver, gameStatus } from "$lib/Game/Game";
+    import { sleep } from "$lib/Utils";
+    import { onMount, tick } from "svelte";
 
     let _state: GameState;
     let dialog: HTMLDialogElement;
 
-    $: if (_state !== $mineFieldState && dialog && $mineFieldState) {
+    $: if ($gameOver) {
+        gameoover();
+    }
+
+    async function gameoover() {
+        await sleep(1000);
         dialog.showModal();
-        _state = $mineFieldState;
-        Timer.pause();
-        clear_current_game();
     }
 </script>
 
-{#if $mineFieldState === GameState.Won}
+{#if $gameStatus === GameState.Won}
     <dialog class="modal" bind:this={dialog}>
         <form method="dialog" class="modal-box">
             <h3 class="font-bold text-lg">Nice job!</h3>
@@ -32,7 +36,7 @@
         </form>
     </dialog>
 {/if}
-{#if $mineFieldState === GameState.Lost}
+{#if $gameStatus === GameState.Lost}
     <dialog class="modal" bind:this={dialog}>
         <form method="dialog" class="modal-box">
             <h3 class="font-bold text-lg">Oh no!</h3>

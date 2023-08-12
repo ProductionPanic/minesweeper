@@ -14,7 +14,12 @@ export interface Alert {
 
 export const alerts = writable<Alert[]>([]);
 
-export function addAlert(alert: Alert, removeAfterInMs: number = 3000) {
+export function addAlert(alert: Alert, removeAfterInMs: number = 3000, onNextLoad: boolean = false) {
+    if (onNextLoad) {
+        localStorage.setItem("alert", JSON.stringify(alert));
+        localStorage.setItem("alertRemoveAfterInMs", removeAfterInMs.toString());
+        return;
+    }
     alerts.update((a) => [...a, alert]);
     setTimeout(() => {
         removeAlert(alert);
@@ -30,4 +35,15 @@ export function removeAlert(alert: Alert) {
 
 export function clearAlerts() {
     alerts.set([]);
+}
+
+export function check() {
+    // Check if there is an alert in local storage
+    const alert = localStorage.getItem("alert");
+    if (alert) {
+        const alertRemoveAfterInMs = localStorage.getItem("alertRemoveAfterInMs")!;
+        addAlert(JSON.parse(alert), parseInt(alertRemoveAfterInMs));
+        localStorage.removeItem("alert");
+        localStorage.removeItem("alertRemoveAfterInMs");
+    }
 }

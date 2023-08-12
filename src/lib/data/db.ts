@@ -9,6 +9,7 @@ export interface MineSweeperTile {
     flag: boolean;
     open: boolean;
     adjacent: number;
+    exploded: boolean;
 };
 
 export interface MinesweeperGame {

@@ -1,6 +1,12 @@
+import { sleep, timestamp } from "$lib/Utils"
 import { db, type MinesweeperGame, type MineSweeperTile } from "$lib/data/db"
-import { TILE_SIZE, type Difficulty } from "."
+import { writable, type Writable } from "svelte/store"
+import { TILE_SIZE, type Difficulty, GameState } from "."
+import { GameTimer } from "./GameTimer"
 
+export const tilesStore: Writable<MineSweeperTile[]> = writable([])
+export const gameOver: Writable<boolean> = writable(false)
+export const gameStatus: Writable<number> = writable(0)
 
 export class MinesweeperInstance {
     public id?: number
@@ -14,7 +20,7 @@ export class MinesweeperInstance {
     public updated: number
 
     constructor(game: MinesweeperGame) {
-        if(game.id) this.id = game.id
+        if (game.id) this.id = game.id
         this.name = game.name
         this.tiles = game.tiles
         this.width = game.width
@@ -23,13 +29,31 @@ export class MinesweeperInstance {
         this.status = game.status
         this.created = game.created
         this.updated = game.updated
+        gameOver.set(false);
+        this.update()
+    }
 
+    private update() {
+        tilesStore.set(this.tiles);
+        // save state to db
+        db.games.update(this.id, {
+            tiles: this.tiles,
+            width: this.width,
+            height: this.height,
+            time: this.time,
+            status: this.status,
+            updated: timestamp(),
+        })
 
+        if (this.status === GameState.Won || this.status === GameState.Lost) {
+            gameOver.set(true);
+        }
+        gameStatus.set(this.status)
     }
 
     public init(difficulty: Difficulty) {
         const needs_init = this.tiles.length === 0;
-        if(!needs_init) return;
+        if (!needs_init) return;
         const max_width = window.innerWidth - 50;
         const max_height = window.innerHeight - 100;
         const tile_size = TILE_SIZE;
@@ -39,19 +63,20 @@ export class MinesweeperInstance {
         this.width = width;
         this.height = height;
         this.tiles = [];
-        for(let i = 0; i < width * height; i++) {
+        for (let i = 0; i < width * height; i++) {
             this.tiles.push({
                 x: i % width,
                 y: Math.floor(i / width),
                 bomb: false,
                 flag: false,
                 open: false,
-                adjacent: 0
+                adjacent: 0,
+                exploded: false,
             })
         }
 
         let bomb_ratio = 0.1;
-        switch(difficulty) {
+        switch (difficulty) {
             case 0: // easy
                 bomb_ratio = 0.1;
                 break;
@@ -60,41 +85,39 @@ export class MinesweeperInstance {
                 break;
             case 2: // hard
                 bomb_ratio = 0.3;
-                break;     
-                default:
-                    break;
+                break;
+            default:
+                break;
         }
-            
+
         let total_bomb_count = Math.floor(this.tiles.length * bomb_ratio);
-        while(total_bomb_count > 0) {
+        while (total_bomb_count > 0) {
             const index = Math.floor(Math.random() * this.tiles.length);
-            if(!this.tiles[index].bomb) {
+            if (!this.tiles[index].bomb) {
                 this.tiles[index].bomb = true;
                 total_bomb_count--;
             }
         }
 
         // calculate adjacent bombs
-        for(let i = 0; i < this.tiles.length; i++) {
+        for (let i = 0; i < this.tiles.length; i++) {
             const tile = this.tiles[i];
-            if(tile.bomb) continue;
+            if (tile.bomb) continue;
             let adjacent = 0;
-            for(let x = tile.x - 1; x <= tile.x + 1; x++) {
-                for(let y = tile.y - 1; y <= tile.y + 1; y++) {
-                    if(x === tile.x && y === tile.y) continue;
-                    if(x < 0 || x >= width) continue;
-                    if(y < 0 || y >= height) continue;
+            for (let x = tile.x - 1; x <= tile.x + 1; x++) {
+                for (let y = tile.y - 1; y <= tile.y + 1; y++) {
+                    if (x === tile.x && y === tile.y) continue;
+                    if (x < 0 || x >= width) continue;
+                    if (y < 0 || y >= height) continue;
                     const index = x + y * width;
-                    if(this.tiles[index].bomb) adjacent++;
+                    if (this.tiles[index].bomb) adjacent++;
                 }
             }
             tile.adjacent = adjacent;
         }
 
         this.time = 0;
-        this.created = Date.now();
-        this.updated = Date.now();
-    }   
+    }
 
 
 
@@ -106,8 +129,8 @@ export class MinesweeperInstance {
             height: 0,
             time: 0,
             status: 0,
-            created: Date.now(),
-            updated: Date.now()
+            created: timestamp(),
+            updated: timestamp(),
         })
         _game.init(difficulty)
         const game = await db.games.add(_game)
@@ -118,11 +141,115 @@ export class MinesweeperInstance {
         const game = await db.games.get(id)
         return new MinesweeperInstance(game as MinesweeperGame)
     }
-    
+
     public static async latest() {
         const game = await db.games.orderBy('created').last()
         return new MinesweeperInstance(game as MinesweeperGame)
     }
 
-    
+    public async reveal(tile: MineSweeperTile) {
+        if (tile.open || tile.flag) return;
+        tile.open = true;
+        if (tile.bomb) {
+            this.status = 2;
+            this.explodeAnimation(tile);
+            GameTimer.pause()
+            this.status = GameState.Lost;
+            return;
+        }
+        if (tile.adjacent === 0) {
+            for (let x = tile.x - 1; x <= tile.x + 1; x++) {
+                await sleep(10);
+                for (let y = tile.y - 1; y <= tile.y + 1; y++) {
+                    if (x === tile.x && y === tile.y) continue;
+                    if (x < 0 || x >= this.width) continue;
+                    if (y < 0 || y >= this.height) continue;
+                    const index = x + y * this.width;
+                    this.reveal(this.tiles[index]);
+                }
+            }
+        }
+        this.checkWin();
+        this.update();
+    }
+
+    public async flag(tile: MineSweeperTile) {
+        if (tile.open) return;
+        tile.flag = !tile.flag;
+        this.checkWin();
+        this.update();
+    }
+
+    public async checkWin() {
+        let win = true;
+        for (let i = 0; i < this.tiles.length; i++) {
+            const tile = this.tiles[i];
+            if (tile.bomb && !tile.flag) {
+                win = false;
+                break;
+            }
+            if (!tile.bomb && !tile.open) {
+                win = false;
+                break;
+            }
+        }
+        if (win) {
+            this.status = GameState.Won;
+        }
+    }
+
+    private getNeighbours(tile: MineSweeperTile) {
+        const neighbours = [];
+        for (let x = tile.x - 1; x <= tile.x + 1; x++) {
+            for (let y = tile.y - 1; y <= tile.y + 1; y++) {
+                if (x === tile.x && y === tile.y) continue;
+                if (x < 0 || x >= this.width) continue;
+                if (y < 0 || y >= this.height) continue;
+                const index = x + y * this.width;
+                neighbours.push(this.tiles[index]);
+            }
+        }
+        return neighbours;
+    }
+
+    private getDirectNeighbours(tile: MineSweeperTile) {
+        const neighbours = [];
+        for (let x = tile.x - 1; x <= tile.x + 1; x++) {
+            for (let y = tile.y - 1; y <= tile.y + 1; y++) {
+                if (x === tile.x && y === tile.y) continue;
+                if (x < 0 || x >= this.width) continue;
+                if (y < 0 || y >= this.height) continue;
+                if (x !== tile.x && y !== tile.y) continue;
+                const index = x + y * this.width;
+                neighbours.push(this.tiles[index]);
+            }
+        }
+        return neighbours;
+    }
+
+    public async explode(tile: MineSweeperTile) {
+        const index = this.tiles.indexOf(tile);
+        if (index === -1) return;
+        tile.exploded = true;
+        tile.open = true;
+        this.update();
+        await sleep(10);
+        tile = this.tiles[index];
+        const neighbours = this.getDirectNeighbours(tile);
+        console.log(neighbours);
+        const o = [];
+        for (let i = 0; i < neighbours.length; i++) {
+            const neighbour = neighbours[i];
+            if (neighbour.exploded) continue;
+            o.push(neighbour);
+        }
+        await Promise.all(o.map(async (neighbour) => {
+            await this.explode(neighbour);
+        }));
+    }
+
+    public async explodeAnimation(startTile: MineSweeperTile) {
+        await sleep(400);
+        await this.explode(startTile);
+    }
 }
