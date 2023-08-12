@@ -4,6 +4,7 @@
     import { onMount, tick } from "svelte";
     import { init_game } from "$lib/Game";
     import type { PageData } from "./$types";
+    import { MinesweeperInstance } from "$lib/Game/Game";
 
     export let data: PageData;
 
@@ -17,6 +18,11 @@
         unsub = mineField.subscribe((val) => {
             _mineField = val;
         });
+
+        const test = await MinesweeperInstance.latest();
+        console.log('latest');
+        console.log(test);
+
     });
 
     let _mineField: MineField | null = null;

@@ -61,7 +61,7 @@ export class SettingsHandler {
         const settings: Partial<Settings> = {};
         for (const key in defaultSettings) {
             const value = output.find((o) => o.key === key);
-            if (value) {
+            if (value && value.value) {
                 const resp = JSON.parse(value.value);
                 // @ts-ignore
                 settings[key] = resp;

@@ -2,16 +2,19 @@ import Dexie, { type Table } from 'dexie';
 
 export type json = string;
 
+export interface MineSweeperTile {
+    x: number;
+    y: number;
+    bomb: boolean;
+    flag: boolean;
+    open: boolean;
+    adjacent: number;
+};
+
 export interface MinesweeperGame {
     id?: number;
     name: string;
-    tiles: {
-        x: number;
-        y: number;
-        bomb: boolean;
-        flag: boolean;
-        open: boolean;
-    }[];
+    tiles: MineSweeperTile[];
     width: number;
     height: number;
     time: number;

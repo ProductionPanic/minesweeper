@@ -8,18 +8,19 @@
         mineFieldTiles,
         reset_all,
     } from "$lib/Game/Field";
-    import { Game } from "$lib/Game/Game";
+    import { MinesweeperInstance } from "$lib/Game/Game";
     import { Vibrate } from "$lib/Vibrate";
     import { onMount, tick } from "svelte";
 
-    async function start(e: any) {
+    async function start(e: any) { 
         reset_all();
         await tick();
         const difficulty = e.target.difficulty.value;
         await new_minesweeper_game(difficulty);
+        await MinesweeperInstance.create(difficulty);
         await tick();
         // goto /game but clear any cached data
-        goto("/game", { replaceState: true });
+        window.location.href = "/game";
     }
 
     function change() {
