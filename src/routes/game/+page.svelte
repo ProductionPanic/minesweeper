@@ -1,10 +1,10 @@
 <script lang="ts">
-    import Game from "./Game.svelte";
     import { MineField, mineField, reset_all } from "$lib/Game/Field";
     import { onMount, tick } from "svelte";
     import { init_game } from "$lib/Game";
     import type { PageData } from "./$types";
     import { MinesweeperInstance } from "$lib/Game/Game";
+    import MineSweeperGameComponent from "./MineSweeperGameComponent.svelte";
 
     export let data: PageData;
 
@@ -30,6 +30,6 @@
 
 {#key mineField}
     {#if loaded && _mineField}
-        <Game mineField={_mineField} />
+        <MineSweeperGameComponent mineField={_mineField} />
     {/if}
 {/key}
