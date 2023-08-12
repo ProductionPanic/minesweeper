@@ -2,7 +2,7 @@
     import EmojiRain from "$lib/components/EmojiRain.svelte";
     import { page } from "$app/stores";
     import { fly } from "svelte/transition";
-    import { settings } from "$lib/settings";
+    import { settings } from "$lib/data/settings";
 </script>
 
 <div class="page-content">

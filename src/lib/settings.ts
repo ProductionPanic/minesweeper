@@ -10,7 +10,7 @@ export interface Settings {
 
 const defaultSettings: Settings = {
     emojirain: true,
-    emojirainCount: 75,
+    emojirainCount: 50,
     vibration: true,
 };
 

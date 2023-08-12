@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { type Settings, SettingsHandler, settings } from "$lib/settings";
+    import { type Settings, SettingsHandler, settings } from "$lib/data/settings";
     import { onMount } from "svelte";
     import { Vibrate } from "$lib/Vibrate";
     import { goto } from "$app/navigation";
-    import {db} from '$lib/db';
+    import {db} from '$lib/data/db';
     import { addAlert } from "$lib/Alerts";
 
     let set: Settings;
@@ -13,6 +13,7 @@
     });
 
     function save() {
+        settings.set(set);
         SettingsHandler.update(set);
         Vibrate.small();
         addAlert({
@@ -31,11 +32,13 @@
         deleteAllDialog.showModal();
     }
 
-    function delete_all_response(e) {
+    function delete_all_response(e: SubmitEvent) {
         deleteAllDialog.close();
-        if (e.submitter.value === "y") {
+        const submitter = e.submitter as HTMLButtonElement;
+        if (submitter.value === "y") {
             db.games.clear();
             db.highscores.clear();
+            db.options.clear();
             if(globalThis && globalThis.window && globalThis.window.localStorage) {
                 window.localStorage.clear();
             }
@@ -78,12 +81,12 @@
                         <input
                             type="checkbox"
                             class="toggle toggle-primary"
-                            bind:checked={$settings.emojirain}
+                            bind:checked={set.emojirain}
                             on:change={change}
                         />
                     </label>
                 </div>
-                {#if $settings.emojirain}
+                {#if set.emojirain}
                     <label
                         class="cursor-pointer label flex-col flex items-start w-full gap-2"
                     >
@@ -95,7 +98,7 @@
                             min="0"
                             max="75"
                             step="5"
-                            bind:value={$settings.emojirainCount}
+                            bind:value={set.emojirainCount}
                             on:change={change}
                             class="range range-primary"
                         />

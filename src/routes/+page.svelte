@@ -1,12 +1,3 @@
-<script lang="ts">
-    import { reset_all } from "$lib/Game/Field";
-    import { db } from "$lib/db";
-    import { liveQuery, type Observable } from "dexie";
-    import { onMount } from "svelte";
-  
-</script>
-
-
 <div class="hero mx-4 rounded-md mt-8">
     <div class="hero-content text-center">
         <div class="max-w-md">
