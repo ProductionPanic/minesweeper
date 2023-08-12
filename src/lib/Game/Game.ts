@@ -1,11 +1,18 @@
-import { GameInstance } from "$lib/db";
+import { db } from "$lib/db"
+
 
 export class Game {
     public static async create(difficulty: number) {
-        const game = await GameInstance.create({
-            difficulty: difficulty,
-            status: "created"
-        }, [{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }], 0)
+        const game = db.games.add({
+            name: new Date().toLocaleString(),
+            tiles: [],
+            width: 0,
+            height: 0,
+            time: 0,
+            status: 0,
+            created: Date.now(),
+            updated: Date.now()
+        })
 
         console.log(game)
 

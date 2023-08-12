@@ -19,7 +19,7 @@
 <svelte:body on:load={loaded} />
 
 {#if showEmojiRain}
-    <EmojiBackground>
+    <EmojiBackground >
         <slot />
     </EmojiBackground>
 {:else}
