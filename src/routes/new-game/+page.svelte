@@ -19,7 +19,8 @@
         const difficulty = e.target.difficulty.value;
         await new_minesweeper_game(difficulty);
         await tick();
-        goto("/game");
+        // goto /game but clear any cached data
+        goto("/game", { replaceState: true });
     }
 
     function change() {
