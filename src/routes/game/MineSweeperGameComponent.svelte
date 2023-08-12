@@ -64,6 +64,7 @@
 <style lang="scss">
     .field {
         display: grid;
+        user-select: none;
     }
 
     .field-container {
