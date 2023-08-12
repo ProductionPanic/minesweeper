@@ -13,7 +13,6 @@
     import { onMount, tick } from "svelte";
 
     async function start(e: any) {
-        Game.create();
         reset_all();
         await tick();
         const difficulty = e.target.difficulty.value;
