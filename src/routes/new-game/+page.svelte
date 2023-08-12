@@ -19,8 +19,7 @@
         await new_minesweeper_game(difficulty);
         await MinesweeperInstance.create(difficulty);
         await tick();
-        // goto /game but clear any cached data
-        window.location.href = "/game";
+        goto("/game");
     }
 
     function change() {

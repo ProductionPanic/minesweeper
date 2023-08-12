@@ -27,6 +27,8 @@
         field.style.height = `${$mineFieldGame!.height * TILE_SIZE}px`;
         field.style.gridTemplateColumns = `repeat(${$mineFieldGame!.width}, 1fr)`;
         field.style.gridTemplateRows = `repeat(${$mineFieldGame!.height}, 1fr)`;
+
+        mineField.on_click(() => sound());
     });
 
     function pause_and_quit() {
@@ -37,11 +39,24 @@
     function flag(tile: TileData) {
         mineField.flag(tile);
         Vibrate.medium();
+        sound();
     }
 
     function reveal(tile: TileData) {
         mineField.reveal(tile);
         Vibrate.small();
+        sound();
+    }
+
+    let sounds = [
+        // "/sounds/pop3.mp3",
+        // "/sounds/pop2.mp3",
+        "/sounds/pop1.mp3",
+    ]
+
+    function sound() {
+        const audio = new Audio(sounds[Math.floor(Math.random() * sounds.length)]);
+        audio.play();
     }
 </script>
 

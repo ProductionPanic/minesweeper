@@ -60,6 +60,12 @@ export class Timer {
 export class MineField {
     public game: MineSweeperData;
     private _won: boolean = false;
+    
+    public on_click(cb: () => void) {
+        window.addEventListener("mineclick", (e) => {
+            cb();
+        });
+    }
 
     constructor(game: MineSweeperData) {        
         this.game = game;
@@ -122,6 +128,7 @@ export class MineField {
         this.update_stores();
         this.save();
         if(!Timer.running()) Timer.start();
+        window.dispatchEvent(new CustomEvent("mineclick"));
     }
 
     public flag(tile: TileData) {
@@ -129,20 +136,25 @@ export class MineField {
         this.update_stores();
         this.save();
         if(!Timer.running()) Timer.start();
+        window.dispatchEvent(new CustomEvent("mineclick"));
     }
 
     public async explode(tile: TileData) {
         if(Timer.running()) Timer.pause();
         let r = 1;
-        while (true) {
+        window.dispatchEvent(new CustomEvent("mineclick"));
+        let not_revealed = this.game.tiles.filter(tile => !tile.isRevealed).length;
+        while (not_revealed > 0) {
             const neighbours = this.get_neighbours(tile, r);
             if (neighbours.length === 0) break;
             for (const neighbour of neighbours) {
+                if(!neighbour.isRevealed) not_revealed--;
                 neighbour.isRevealed = true;
                 neighbour.isExploded = true;
             }
             r++;
             this.update_stores();
+            window.dispatchEvent(new CustomEvent("mineclick"));
             await new Promise(resolve => setTimeout(resolve, 100));
         }
         this.game.state = GameState.Lost;

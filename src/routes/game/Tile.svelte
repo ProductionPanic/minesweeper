@@ -38,7 +38,7 @@
 </script>
 
 <button
-    class="tile"
+    class="tile number-{number}"
     style="--size:{size}"
     on:pointerdown={mousedown}
     on:pointerup={mouseup}
@@ -95,6 +95,32 @@
 
         &.revealed {
             @apply bg-gray-900;
+
+            &.number-1 {
+                @apply text-blue-500;
+            }
+            &.number-2 {
+                @apply text-green-500;
+            }
+            &.number-3 {
+                @apply text-red-500;
+            }
+            &.number-4 {
+                @apply text-purple-500;
+            }
+            &.number-5 {
+                @apply text-yellow-500;
+            }
+            &.number-6 {
+                @apply text-pink-500;
+            }
+            &.number-7 {
+                @apply text-gray-500;
+            }
+            &.number-8 {
+                @apply text-gray-300;
+            }
+            
         }
         &.revealed.bomb {
             @apply bg-red-600;
