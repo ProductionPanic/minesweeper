@@ -56,7 +56,7 @@
     }
 </script>
 
-{#if instance}
+{#if instance && $tilesStore}
     <div class="field-container">
         <TopBar bind:time={$timer} on:leave={pause_and_quit} />
         <div class="field" bind:this={field}>

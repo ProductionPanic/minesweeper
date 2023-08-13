@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+    import { goto, invalidateAll } from "$app/navigation";
     import { GameState, clear_current_game } from "$lib/Game";
     import { Timer, mineFieldState } from "$lib/Game/Field";
     import {
@@ -38,7 +38,8 @@
     async function restart() {
         const difficulty = $settings.lastDifficulty;
         await MinesweeperInstance.create(difficulty);
-        window.location.href = "/init"
+        await sleep(10);
+        goto("/init")
     }
 </script>
 

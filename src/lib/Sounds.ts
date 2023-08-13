@@ -1,3 +1,4 @@
+import { Vibrate } from "./Vibrate";
 import { SettingsHandler } from "./data/settings";
 
 export class Sounds {
@@ -8,10 +9,11 @@ export class Sounds {
     }
 
     public static async pop() {
+        Vibrate.small();
         if(!await this.shouldPlay()) return;
         const randomPop = this.pop_sounds[Math.floor(Math.random() * this.pop_sounds.length)]
         let audio = new Audio("/sounds/"+randomPop+".mp3")
-        audio.volume = 0.1;
+        audio.volume = 0.05;
         audio.play();
     }
 }
