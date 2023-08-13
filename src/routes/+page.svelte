@@ -5,13 +5,9 @@
     import { SettingsHandler, settings } from "$lib/data/settings";
     import { tick } from "svelte";
 
-    
     async function quickgame(e:any) {        
         Loading.start();
         const difficulty = $settings.lastDifficulty;
-        SettingsHandler.update({
-            lastDifficulty: difficulty,
-        })
         await MinesweeperInstance.create(difficulty);
         await tick();
         goto("/game");
@@ -34,11 +30,14 @@
         <div class="max-w-md full-width-buttons">
             <div class="grid grid-cols-2 gap-4">
                 <button class="btn btn-primary btn-block" on:click={quickgame}>
-                   Quick game
+                    Quick game
                 </button>
-                <a class="btn btn-primary btn-outline btn-block" href="/new-game">
-                New game
-                </a> 
+                <a
+                    class="btn btn-primary btn-outline btn-block"
+                    href="/new-game"
+                >
+                    New game
+                </a>
             </div>
             <a class="btn btn-neutral btn-block" href="/settings"> Settings </a>
         </div>

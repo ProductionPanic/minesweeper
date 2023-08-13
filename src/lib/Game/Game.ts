@@ -4,6 +4,7 @@ import { writable, type Writable } from "svelte/store"
 import { TILE_SIZE, type Difficulty, GameState } from "."
 import { GameTimer } from "./GameTimer"
 import { Sounds } from "$lib/Sounds"
+import { addAlert } from "$lib/Alerts"
 
 export const tilesStore: Writable<MineSweeperTile[]> = writable([])
 export const gameOver: Writable<boolean> = writable(false)
@@ -55,7 +56,7 @@ export class MinesweeperInstance {
     public init(difficulty: Difficulty) {
         const needs_init = this.tiles.length === 0;
         if (!needs_init) return;
-        const max_width = window.innerWidth - 50;
+        const max_width = window.innerWidth - 20;
         const max_height = window.innerHeight - 100;
         const tile_size = TILE_SIZE;
         const width = Math.floor(max_width / tile_size);
@@ -77,19 +78,25 @@ export class MinesweeperInstance {
         }
 
         let bomb_ratio = 0.1;
-        switch (difficulty) {
+        switch (+difficulty) {
+            case 3: // super easy
+                bomb_ratio = 0.05;
             case 0: // easy
                 bomb_ratio = 0.1;
                 break;
             case 1: // medium
-                bomb_ratio = 0.2;
+                bomb_ratio = 0.15;
                 break;
             case 2: // hard
-                bomb_ratio = 0.35;
+                bomb_ratio = 0.25;
                 break;
+            case 4: // super hard
+                bomb_ratio = 0.35;
             default:
                 break;
         }
+        console.log(difficulty === 2);
+
 
         let total_bomb_count = Math.floor(this.tiles.length * bomb_ratio);
         while (total_bomb_count > 0) {
@@ -132,6 +139,7 @@ export class MinesweeperInstance {
             status: 0,
             created: timestamp(),
             updated: timestamp(),
+            difficulty
         })
         _game.init(difficulty)
         const game = await db.games.add(_game)
@@ -190,6 +198,7 @@ export class MinesweeperInstance {
             this.status = GameState.Won;
             GameTimer.pause();
             this.update();
+            this.saveHighscore();
         }
     }
 
@@ -229,9 +238,9 @@ export class MinesweeperInstance {
         tile.open = true;
         this.update();
         await sleep(5);
-        if(tile.bomb) {
-            
-        Sounds.pop();
+        if (tile.bomb) {
+
+            Sounds.pop();
         }
         tile = this.tiles[index];
         const neighbours = this.getDirectNeighbours(tile);
@@ -252,5 +261,20 @@ export class MinesweeperInstance {
         Sounds.pop();
         await sleep(400);
         await this.explode(startTile);
+    }
+
+    public async saveHighscore() {
+        db.highscores.add({
+            name: this.name,
+            time: GameTimer.time,
+            difficulty: this.tiles.length,
+            created: timestamp()
+        })
+
+        addAlert({
+            title: "Saved your result!",
+            message: `You finished the game in ${this.time} seconds!`,
+            type: "success"
+        })
     }
 }
