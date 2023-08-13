@@ -1,6 +1,9 @@
 <script lang="ts">
     import { mineFieldTiles } from "$lib/Game/Field";
-    import { tilesStore } from "$lib/Game/Game";
+    import { gameDifficulty, tilesStore } from "$lib/Game/Game";
+    import { highscores } from "$lib/data/HighScores";
+    import type { MinesweeperHighscore } from "$lib/data/db";
+    import type { Observable } from "dexie";
     import { createEventDispatcher, onMount } from "svelte";
 
     const dispatch = createEventDispatcher();
@@ -16,8 +19,25 @@
     let totalMineCount: number = 0;
     let totalFlaggedCount: number = 0;
 
-    $: totalMineCount = ($tilesStore?$tilesStore.filter((tile) => tile.bomb):[]).length;
-    $: totalFlaggedCount = ($tilesStore?$tilesStore.filter((tile) => tile.flag):[]).length;
+    $: totalMineCount = (
+        $tilesStore ? $tilesStore.filter((tile) => tile.bomb) : []
+    ).length;
+    $: totalFlaggedCount = (
+        $tilesStore ? $tilesStore.filter((tile) => tile.flag) : []
+    ).length;
+
+    let _highscores: Observable<MinesweeperHighscore[]>;
+    let highscore: MinesweeperHighscore;
+
+    $: if (_highscores && _highscores.length > 0) {
+        highscore = _highscores[0];
+    }
+
+    $: if ($gameDifficulty) {
+        _highscores = highscores.get().getHighScore($gameDifficulty);
+    }
+
+    $: console.log($_highscores);
 </script>
 
 <div class="navbar bg-base-100 mb-4">
@@ -46,6 +66,17 @@
         <a class="btn btn-ghost normal-case text-xl">
             {formattedTime}
         </a>
+
+        {#if highscore}
+            <a
+                class="btn btn-ghost normal-case text-xl"
+                href={`https://www.google.com/search?q=${highscore.name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {highscore.name}
+            </a>
+        {/if}
     </div>
     <div class="flex-none">
         <div class="stat text-center">

@@ -9,7 +9,8 @@
     import { goto } from "$app/navigation";
     import { db } from "$lib/data/db";
     import { addAlert } from "$lib/Alerts";
-    import { Loading } from "$lib/Utils";
+    import { Loading, timestamp } from "$lib/Utils";
+    import { highscores } from "$lib/data/HighScores";
 
     let set: Settings;
 
@@ -64,6 +65,12 @@
             window.location.reload();
         }
     }
+
+    // get capacitor platform
+    let platform: string;
+    if (globalThis && globalThis.window && globalThis.window.Capacitor) {
+        platform = window.Capacitor.getPlatform();
+    }
 </script>
 
 <div class="flex-1 flex flex-col justify-between w-full">
@@ -83,6 +90,21 @@
     {#if set}
         <div class="settings-part">
             <div class="inputs">
+                {#if platform && platform === "web"}
+                    <div class="form-control w-full">
+                        <button
+                            on:click={() =>
+                                highscores.get().addHighScore({
+                                    name: "test",
+                                    created: timestamp(),
+                                    time: 40,
+                                    difficulty: 0,
+                                })}
+                            class="btn btn-primary">Add test highscore</button
+                        >
+                    </div>
+                {/if}
+
                 <div class="form-control w-full">
                     <label class="cursor-pointer label">
                         <span class="label-text">Use vibrations</span>

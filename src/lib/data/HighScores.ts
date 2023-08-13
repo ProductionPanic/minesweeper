@@ -3,17 +3,6 @@ import { db, type MinesweeperHighscore } from "./db";
 
 export class highscores {
     private static instance: highscores;
-    private highScores: MinesweeperHighscore[] = [];
-
-    private constructor() {
-        const obs = liveQuery(() => {
-            return db.highscores.toArray();
-        });
-
-        obs.subscribe((highscores) => {
-            this.highScores = highscores;
-        });
-    }
 
     public static get(): highscores {
         if (!highscores.instance) {
@@ -23,12 +12,8 @@ export class highscores {
         return highscores.instance;
     }
 
-    public getHighScores(count: number = 1): MinesweeperHighscore[] {
-        return this.highScores;
-    }
-
-    public getHighScoreForDifficulty(difficulty: number, count: number = 1): MinesweeperHighscore[] {
-        return this.highScores.filter((hs) => hs.difficulty === difficulty).slice(0, count);
+    public getHighScore(difficulty: number) {
+        return liveQuery(() => db.highscores.where("difficulty").equals(difficulty).toArray())
     }
 
     public async addHighScore(highscore: MinesweeperHighscore): Promise<any> {
