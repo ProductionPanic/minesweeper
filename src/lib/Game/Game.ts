@@ -5,6 +5,7 @@ import { TILE_SIZE, type Difficulty, GameState } from "."
 import { GameTimer } from "./GameTimer"
 import { Sounds } from "$lib/Sounds"
 import { addAlert } from "$lib/Alerts"
+import { highscores } from "$lib/data/HighScores"
 
 export const tilesStore: Writable<MineSweeperTile[]> = writable([])
 export const gameOver: Writable<boolean> = writable(false)
@@ -20,6 +21,7 @@ export class MinesweeperInstance {
     public status: number
     public created: number
     public updated: number
+    public difficulty: number
 
     constructor(game: MinesweeperGame) {
         if (game.id) this.id = game.id
@@ -31,6 +33,7 @@ export class MinesweeperInstance {
         this.status = game.status
         this.created = game.created
         this.updated = game.updated
+        this.difficulty = game.difficulty || -1
         gameOver.set(false);
         this.update()
     }
@@ -239,8 +242,7 @@ export class MinesweeperInstance {
         this.update();
         await sleep(5);
         if (tile.bomb) {
-
-            Sounds.pop();
+            Sounds.explosion("small");
         }
         tile = this.tiles[index];
         const neighbours = this.getDirectNeighbours(tile);
@@ -257,18 +259,20 @@ export class MinesweeperInstance {
 
     public async explodeAnimation(startTile: MineSweeperTile) {
         GameTimer.pause();
-        Sounds.pop();
+        Sounds.explosion("big");
         await sleep(400);
         await this.explode(startTile);
     }
 
     public async saveHighscore() {
-        db.highscores.add({
+        const idk = await highscores.get().addHighScore({
             name: this.name,
             time: GameTimer.time,
-            difficulty: this.tiles.length,
+            difficulty: this.difficulty,
             created: timestamp()
         })
+        console.log(idk);
+
 
         addAlert({
             title: "Saved your result!",
