@@ -1,11 +1,13 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { MinesweeperInstance } from "$lib/Game/Game";
+    import { Loading } from "$lib/Utils";
     import { SettingsHandler, settings } from "$lib/data/settings";
     import { tick } from "svelte";
 
     
     async function quickgame(e:any) {        
+        Loading.start();
         const difficulty = $settings.lastDifficulty;
         SettingsHandler.update({
             lastDifficulty: difficulty,

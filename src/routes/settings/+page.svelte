@@ -9,6 +9,7 @@
     import { goto } from "$app/navigation";
     import { db } from "$lib/data/db";
     import { addAlert } from "$lib/Alerts";
+    import { Loading } from "$lib/Utils";
 
     let set: Settings;
 
@@ -16,14 +17,16 @@
         set = await SettingsHandler.get();
     });
 
-    function save() {
+    async function save() {
+        Loading.start();
         settings.set(set);
-        SettingsHandler.update(set);
-        Vibrate.small();
+        await SettingsHandler.update(set);
+        await Vibrate.small();
         addAlert({
             title: "Settings saved",
             type: "success",
         });
+        Loading.stop();
     }
 
     function change() {
@@ -36,6 +39,7 @@
     }
 
     function delete_all_response(e: SubmitEvent) {
+        Loading.start();
         deleteAllDialog.close();
         const submitter = e.submitter as HTMLButtonElement;
         if (submitter.value === "y") {
