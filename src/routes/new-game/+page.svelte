@@ -10,21 +10,49 @@
     } from "$lib/Game/Field";
     import { MinesweeperInstance } from "$lib/Game/Game";
     import { Vibrate } from "$lib/Vibrate";
-    import { SettingsHandler } from "$lib/data/settings";
+    import { SettingsHandler, settings } from "$lib/data/settings";
     import { onMount, tick } from "svelte";
 
-    async function start(e: any) { 
+    async function start(e: any) {
         const difficulty = e.target.difficulty.value;
         SettingsHandler.update({
             lastDifficulty: difficulty,
-        })
+        });
         await MinesweeperInstance.create(difficulty);
-        goto("/game");
+        window.location.href = "/game";
     }
-
+    $: console.log($settings.lastDifficulty);
     function change() {
         Vibrate.small();
     }
+
+    const difficulties = [
+        {
+            value: 3,
+            label: "Super Easy",
+            color: "checked:bg-cyan-500",
+        },
+        {
+            value: 0,
+            label: "Easy",
+            color: "checked:bg-lime-500",
+        },
+        {
+            value: 1,
+            label: "Medium",
+            color: "checked:bg-amber-500",
+        },
+        {
+            value: 2,
+            label: "Hard",
+            color: "checked:bg-red-500",
+        },
+        {
+            value: 4,
+            label: "Super Hard",
+            color: "checked:bg-green-800",
+        },
+    ];
 </script>
 
 <div class="flex-1 flex flex-col justify-between w-full">
@@ -43,43 +71,21 @@
 
     <form class="selection" on:submit|preventDefault={start}>
         <div class="choices px-4">
-            <div class="form-control">
-                <label class="label cursor-pointer">
-                    <span class="label-text">Easy</span>
-                    <input
-                        type="radio"
-                        name="difficulty"
-                        class="radio checked:bg-lime-500"
-                        checked
-                        value="0"
-                        on:change
-                    />
-                </label>
-            </div>
-            <div class="form-control">
-                <label class="label cursor-pointer">
-                    <span class="label-text">Medium</span>
-                    <input
-                        type="radio"
-                        name="difficulty"
-                        class="radio checked:bg-amber-500"
-                        value="1"
-                        on:change
-                    />
-                </label>
-            </div>
-            <div class="form-controol">
-                <label class="label cursor-pointer">
-                    <span class="label-text">Hard</span>
-                    <input
-                        type="radio"
-                        name="difficulty"
-                        class="radio checked:bg-red-500"
-                        value="2"
-                        on:change
-                    />
-                </label>
-            </div>
+            {#each difficulties as d}
+                <div class="form-control">
+                    <label class="label cursor-pointer">
+                        <span class="label-text">{d.label}</span>
+                        <input
+                            type="radio"
+                            name="difficulty"
+                            class="radio {d.color}"
+                            checked={$settings.lastDifficulty == d.value}
+                            value={d.value}
+                            on:change
+                        />
+                    </label>
+                </div>
+            {/each}
         </div>
         <div class="buttons grid grid-cols-2 gap-4 w-full p-4">
             <button class="btn btn-accent" type="submit">Start</button>
