@@ -9,6 +9,7 @@
         reset_all,
     } from "$lib/Game/Field";
     import { MinesweeperInstance } from "$lib/Game/Game";
+    import { Sounds } from "$lib/Sounds";
     import { Vibrate } from "$lib/Vibrate";
     import { SettingsHandler, settings } from "$lib/data/settings";
     import { onMount, tick } from "svelte";
@@ -19,11 +20,11 @@
             lastDifficulty: difficulty,
         });
         await MinesweeperInstance.create(difficulty);
-        window.location.href = "/game";
+        goto("/game");
     }
     $: console.log($settings.lastDifficulty);
     function change() {
-        Vibrate.small();
+        Sounds.pop();
     }
 
     const difficulties = [
@@ -81,7 +82,7 @@
                             class="radio {d.color}"
                             checked={$settings.lastDifficulty == d.value}
                             value={d.value}
-                            on:change
+                            on:change={change}
                         />
                     </label>
                 </div>

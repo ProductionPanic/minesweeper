@@ -56,7 +56,7 @@ export class MinesweeperInstance {
     public init(difficulty: Difficulty) {
         const needs_init = this.tiles.length === 0;
         if (!needs_init) return;
-        const max_width = window.innerWidth - 50;
+        const max_width = window.innerWidth - 20;
         const max_height = window.innerHeight - 100;
         const tile_size = TILE_SIZE;
         const width = Math.floor(max_width / tile_size);
