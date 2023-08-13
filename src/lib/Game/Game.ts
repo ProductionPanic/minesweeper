@@ -95,7 +95,6 @@ export class MinesweeperInstance {
             default:
                 break;
         }
-        console.log(difficulty === 2);
 
 
         let total_bomb_count = Math.floor(this.tiles.length * bomb_ratio);
@@ -130,6 +129,7 @@ export class MinesweeperInstance {
 
 
     public static async create(difficulty: Difficulty) {
+
         const _game = new MinesweeperInstance({
             name: new Date().toLocaleString(),
             tiles: [],
@@ -244,7 +244,6 @@ export class MinesweeperInstance {
         }
         tile = this.tiles[index];
         const neighbours = this.getDirectNeighbours(tile);
-        console.log(neighbours);
         const o = [];
         for (let i = 0; i < neighbours.length; i++) {
             const neighbour = neighbours[i];
@@ -273,7 +272,7 @@ export class MinesweeperInstance {
 
         addAlert({
             title: "Saved your result!",
-            message: `You finished the game in ${this.time} seconds!`,
+            message: `You finished the game in ${GameTimer.time} seconds!`,
             type: "success"
         })
     }

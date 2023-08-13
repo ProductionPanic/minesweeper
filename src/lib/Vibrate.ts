@@ -1,18 +1,9 @@
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
-import { settings } from "./data/settings";
+import { SettingsHandler, settings } from "./data/settings";
 
 export class Vibrate {
     private static async shouldVibrate() {
-        return new Promise<boolean>((resolve, reject) => {
-            let unsub = settings.subscribe((value) => {
-                resolve(value.vibration)
-            })
-
-            setTimeout(() => {
-                unsub()
-                resolve(false)
-            }, 1000)
-        })
+        return (await SettingsHandler.get()).vibration;
     }
 
     private static async run_style(style: ImpactStyle) {

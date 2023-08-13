@@ -16,8 +16,8 @@
     let totalMineCount: number = 0;
     let totalFlaggedCount: number = 0;
 
-    $: totalMineCount = $tilesStore.filter((tile) => tile.bomb).length;
-    $: totalFlaggedCount = $tilesStore.filter((tile) => tile.flag).length;
+    $: totalMineCount = ($tilesStore?$tilesStore.filter((tile) => tile.bomb):[]).length;
+    $: totalFlaggedCount = ($tilesStore?$tilesStore.filter((tile) => tile.flag):[]).length;
 </script>
 
 <div class="navbar bg-base-100 mb-4">

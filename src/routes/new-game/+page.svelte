@@ -10,17 +10,19 @@
     } from "$lib/Game/Field";
     import { MinesweeperInstance } from "$lib/Game/Game";
     import { Sounds } from "$lib/Sounds";
+    import { Loading } from "$lib/Utils";
     import { Vibrate } from "$lib/Vibrate";
     import { SettingsHandler, settings } from "$lib/data/settings";
     import { onMount, tick } from "svelte";
 
     async function start(e: any) {
+        Loading.start();
         const difficulty = e.target.difficulty.value;
         SettingsHandler.update({
             lastDifficulty: difficulty,
         });
         await MinesweeperInstance.create(difficulty);
-        goto("/game");
+        goto("/init");
     }
     $: console.log($settings.lastDifficulty);
     function change() {
