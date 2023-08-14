@@ -23,6 +23,9 @@ dependencies:
   '@capacitor/splash-screen':
     specifier: ^5.0.6
     version: 5.0.6(@capacitor/core@5.2.2)
+  '@capacitor/status-bar':
+    specifier: ^5.0.6
+    version: 5.0.6(@capacitor/core@5.2.2)
   '@lottiefiles/svelte-lottie-player':
     specifier: ^0.3.0
     version: 0.3.0
@@ -155,6 +158,14 @@ packages:
 
   /@capacitor/splash-screen@5.0.6(@capacitor/core@5.2.2):
     resolution: {integrity: sha512-9B8wSm89D+LlshFw8B+mjPU8pJNf1WOx2mkMjMvcH0/EqxNaE+ZaO8lPCX+9WvWSEZs3O3l11qiSnOFHeK0t9A==}
+    peerDependencies:
+      '@capacitor/core': ^5.0.0
+    dependencies:
+      '@capacitor/core': 5.2.2
+    dev: false
+
+  /@capacitor/status-bar@5.0.6(@capacitor/core@5.2.2):
+    resolution: {integrity: sha512-7od8CxsBnot1XMK3IeOkproFL4hgoKoWAc3pwUvmDOkQsXoxwQm4SR9mLwQavv1XfxtHbFV9Ukd7FwMxOPSViw==}
     peerDependencies:
       '@capacitor/core': ^5.0.0
     dependencies:
