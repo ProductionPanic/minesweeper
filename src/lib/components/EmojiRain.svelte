@@ -4,6 +4,7 @@
     import { onDestroy, onMount, tick } from "svelte";
     import { browser } from "$app/environment";
     import type { p5 } from "p5";
+    import { updated } from "$app/stores";
     export let emojis: string[] = "💣 💀 🧠 💥 🧨 📍 🏴".split(" ");
     export let amount: number = 100;
     export const bg = "#191E24";
@@ -21,10 +22,34 @@
     let canvasContainer: HTMLDivElement;
 
     onMount(async () => {
+        update();
+        setInterval(async() => {
+            if(await checkWindowChangedSize()) {
+                update();
+            }
+        }, 5000)
+    });
+
+    let instance:p5;
+
+    async function checkWindowChangedSize() {
         if (!browser) return;
         const p5imoprt = await import("p5");
         const p5 = p5imoprt.default;
-        new p5((p: p5) => {
+        if(instance) {
+            if(instance.width !== canvasContainer.clientWidth || instance.height !== canvasContainer.clientHeight) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    async function update() {        
+        if (!browser) return;
+        if(instance) instance.remove();
+        const p5imoprt = await import("p5");
+        const p5 = p5imoprt.default;
+        instance = new p5((p: p5) => {
             p.setup = () => {
                 p.createCanvas(
                     canvasContainer.clientWidth,
@@ -68,7 +93,7 @@
                 }
             };
         }, canvasContainer);
-    });
+    }
 
     onDestroy(() => {
         drops = [];
