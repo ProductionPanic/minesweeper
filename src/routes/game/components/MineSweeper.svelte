@@ -78,7 +78,7 @@
     .field {
         display: grid;
         user-select: none;
-        @apply bg-gray-900 shadow-xl;
+        @apply bg-base-200 shadow-xl;
     }
 
     .field-container {

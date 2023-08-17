@@ -28,8 +28,7 @@
 
         &:before {
             content: "";
-            @apply absolute inset-0;
-            background: rgba(0, 0, 0, 0.5);
+            @apply absolute inset-0 bg-base-300 bg-opacity-50;
             z-index: 1;
         }
     }

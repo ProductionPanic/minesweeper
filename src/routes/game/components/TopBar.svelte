@@ -36,8 +36,6 @@
     $: if ($gameDifficulty) {
         _highscores = highscores.get().getHighScore($gameDifficulty);
     }
-
-    $: console.log($_highscores);
 </script>
 
 <div class="navbar bg-base-100 mb-4">

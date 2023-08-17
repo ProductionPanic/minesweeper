@@ -2,10 +2,11 @@
     import { goto } from "$app/navigation";
     import { MinesweeperInstance } from "$lib/Game/Game";
     import { Loading } from "$lib/Utils";
+    import { lastGameId } from "$lib/data/LastGame";
     import { SettingsHandler, settings } from "$lib/data/settings";
     import { tick } from "svelte";
 
-    async function quickgame(e:any) {        
+    async function quickgame(e: any) {
         Loading.start();
         const difficulty = $settings.lastDifficulty;
         await MinesweeperInstance.create(difficulty);
@@ -29,6 +30,11 @@
     <div class="hero-content text-center w-full">
         <div class="max-w-md full-width-buttons">
             <div class="grid grid-cols-2 gap-4">
+                {#if $lastGameId > 0}
+                    <a href="/game" class="btn-secondary btn col-span-2">
+                        Continue last game
+                    </a>
+                {/if}
                 <button class="btn btn-primary btn-block" on:click={quickgame}>
                     Quick game
                 </button>

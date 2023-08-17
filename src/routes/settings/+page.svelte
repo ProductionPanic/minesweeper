@@ -9,8 +9,17 @@
     import { goto } from "$app/navigation";
     import { db } from "$lib/data/db";
     import { addAlert } from "$lib/Alerts";
-    import { Loading, timestamp } from "$lib/Utils";
+    import { Capitalize, Loading, timestamp } from "$lib/Utils";
     import { highscores } from "$lib/data/HighScores";
+    import { Capacitor } from "@capacitor/core";
+    import {
+        Themes,
+        currentTheme,
+        darkThemes,
+        lightThemes,
+        setTheme,
+    } from "$lib/data/Themes";
+    import Modal from "$lib/components/Modal.svelte";
 
     let set: Settings;
 
@@ -63,15 +72,78 @@
                 true
             );
             window.location.reload();
+            return;
+        } else {
+            Loading.stop();
         }
     }
 
     // get capacitor platform
-    let platform: string;
-    if (globalThis && globalThis.window && globalThis.window.Capacitor) {
-        platform = window.Capacitor.getPlatform();
+    let platform: string = Capacitor.getPlatform();
+
+    let theme_modal_open: boolean = false;
+
+    function select_theme() {
+        theme_modal_open = true;
     }
+
+    const themeData = [
+        {
+            title: "Dark themes",
+            themes: darkThemes,
+        },
+        {
+            title: "Light themes",
+            themes: lightThemes,
+        },
+    ];
 </script>
+
+<Modal bind:open={theme_modal_open}>
+    <h3 class="font-bold text-lg">Select a theme</h3>
+    <p>
+        Select a theme for the game. This will change the background and the
+        colors of the game.
+    </p>
+    <div class="py-4">
+        <div class="badge-xs badge">default</div>
+        <div class="badge-xs badge badge-neutral">neutral</div>
+        <div class="badge-xs badge badge-primary">primary</div>
+        <div class="badge-xs badge badge-secondary">secondary</div>
+        <div class="badge-xs badge badge-accent">accent</div>
+        <div class="badge-xs badge badge-ghost">ghost</div>
+    </div>
+    <div class="grid grid-cols-1 gap-4">
+        {#each themeData as item}
+            <div class="theme-cat">
+                <h3>
+                    {item.title}
+                </h3>
+                <div class="flex gap-2 flex-wrap">
+                    {#each item.themes as theme}
+                        <button
+                            class="btn btn-primary"
+                            on:click|preventDefault={() => {
+                                setTheme(theme);
+                            }}
+                        >
+                            {Capitalize(theme)}
+                        </button>
+                    {/each}
+                </div>
+            </div>
+        {/each}
+
+        <button
+            class="btn btn-primary btn-outline"
+            on:click|preventDefault={() => {
+                theme_modal_open = false;
+            }}
+        >
+            Close
+        </button>
+    </div>
+</Modal>
 
 <div class="flex-1 flex flex-col justify-between w-full">
     <div class="top-bar">
@@ -104,6 +176,17 @@
                         >
                     </div>
                 {/if}
+                <div class="form-control">
+                    <label class="cursor-pointer label">
+                        <span class="label-text">Theme</span>
+                        <button
+                            on:click={select_theme}
+                            class="btn btn-acceent btn-sm"
+                        >
+                            {Capitalize($currentTheme)}
+                        </button>
+                    </label>
+                </div>
 
                 <div class="form-control w-full">
                     <label class="cursor-pointer label">

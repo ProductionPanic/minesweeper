@@ -9,7 +9,7 @@ import { highscores } from "$lib/data/HighScores"
 
 export const tilesStore: Writable<MineSweeperTile[]> = writable([])
 export const gameOver: Writable<boolean> = writable(false)
-export const gameStatus: Writable<number> = writable(0)
+export const gameStatus: Writable<GameState> = writable(0)
 export const gameDifficulty: Writable<Difficulty> = writable(0)
 
 export class MinesweeperInstance {
@@ -46,7 +46,7 @@ export class MinesweeperInstance {
             tiles: this.tiles,
             width: this.width,
             height: this.height,
-            time: this.time,
+            time: GameTimer.time,
             status: this.status,
             updated: timestamp(),
         })

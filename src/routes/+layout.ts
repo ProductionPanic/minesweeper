@@ -6,8 +6,21 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from "@capacitor/core";
 import { App as CapacitorApp } from '@capacitor/app';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
+import { currentTheme, getTheme } from "$lib/data/Themes";
 
 export const prerender = true;
+
+async function setTheme(theme: string) {
+    document.documentElement.setAttribute("data-theme", theme);
+}
+
+(async () => {
+    if (!browser) return;
+    currentTheme.subscribe(async (theme) => {
+        theme && await setTheme(theme);
+    });
+    await getTheme();
+})();
 
 (async () => {
     if (!browser) return;

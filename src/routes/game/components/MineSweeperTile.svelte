@@ -79,8 +79,8 @@
 <style lang="scss">
     .tile {
         @apply flex items-center justify-center rounded-md;
-        @apply bg-gray-800;
-        @apply border border-gray-900;
+        @apply bg-neutral-900;
+        @apply border border-base-300;
         @apply cursor-pointer;
         @apply transition-all;
         @apply relative;
@@ -91,7 +91,7 @@
         height: var(--size);
 
         &.revealed {
-            @apply bg-gray-900;
+            @apply bg-neutral-800;
 
             &.number-1 {
                 @apply text-blue-500;
@@ -132,7 +132,7 @@
             }
         }
         &.flagged {
-            @apply bg-gray-600;
+            @apply bg-base-100;
         }
     }
 
@@ -157,7 +157,7 @@
     }
 
     .tile .flag svg {
-        fill: theme("colors.white");
+        fill: theme("colors.primary");
     }
 
     @keyframes bomb {

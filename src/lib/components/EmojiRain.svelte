@@ -23,30 +23,33 @@
 
     onMount(async () => {
         update();
-        setInterval(async() => {
-            if(await checkWindowChangedSize()) {
+        setInterval(async () => {
+            if (await checkWindowChangedSize()) {
                 update();
             }
-        }, 5000)
+        }, 5000);
     });
 
-    let instance:p5;
+    let instance: p5;
 
     async function checkWindowChangedSize() {
         if (!browser) return;
         const p5imoprt = await import("p5");
         const p5 = p5imoprt.default;
-        if(instance) {
-            if(instance.width !== canvasContainer.clientWidth || instance.height !== canvasContainer.clientHeight) {
+        if (instance && canvasContainer) {
+            if (
+                instance.width !== canvasContainer.clientWidth ||
+                instance.height !== canvasContainer.clientHeight
+            ) {
                 return true;
             }
         }
         return false;
     }
 
-    async function update() {        
+    async function update() {
         if (!browser) return;
-        if(instance) instance.remove();
+        if (instance) instance.remove();
         const p5imoprt = await import("p5");
         const p5 = p5imoprt.default;
         instance = new p5((p: p5) => {
