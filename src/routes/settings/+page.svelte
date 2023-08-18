@@ -162,20 +162,6 @@
     {#if set}
         <div class="settings-part">
             <div class="inputs">
-                {#if platform && platform === "web"}
-                    <div class="form-control w-full">
-                        <button
-                            on:click={() =>
-                                highscores.get().addHighScore({
-                                    name: "test",
-                                    created: timestamp(),
-                                    time: 40,
-                                    difficulty: 0,
-                                })}
-                            class="btn btn-primary">Add test highscore</button
-                        >
-                    </div>
-                {/if}
                 <div class="form-control">
                     <label class="cursor-pointer label">
                         <span class="label-text">Theme</span>

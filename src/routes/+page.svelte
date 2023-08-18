@@ -46,6 +46,15 @@
                 </a>
             </div>
             <a class="btn btn-neutral btn-block" href="/settings"> Settings </a>
+            <div class="grid grid-cols-3 gap-4">
+                <a href="/extra" class="btn btn-accent"> Extras </a>
+                <button
+                    class="col-span-2 btn btn-outline btn-accent"
+                    on:click={review}
+                >
+                    Write a review
+                </button>
+            </div>
         </div>
     </div>
 </div>
