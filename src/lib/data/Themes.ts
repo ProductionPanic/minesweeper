@@ -60,7 +60,7 @@ export const lightThemes = [
 
 export type Theme = typeof Themes[number];
 
-const themeStore = writable<Theme>("light");
+const themeStore = writable<Theme>("dark");
 
 export const currentTheme: Writable<Theme> = (() => {
     return {
