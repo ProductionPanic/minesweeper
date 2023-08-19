@@ -1,6 +1,5 @@
-# Native App Template
-
-native app using SvelteKit, Capacitor, TailwindCSS, and DaisyUI.
+# Sveltekit minesweeper app 
+### using SvelteKit, Capacitor, TailwindCSS, and DaisyUI.
 
 ## Getting Started
 
