@@ -1,38 +1,41 @@
-# create-svelte
+# Native App Template
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This is a template for creating a native app using SvelteKit, Capacitor, TailwindCSS, and DaisyUI.
 
-## Creating a project
+## Getting Started
 
-If you're seeing this, you've probably already done this step. Congrats!
+1. Clone this repository.
+2. Install the dependencies:
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+```
+npm install
 ```
 
-## Developing
+## Development
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+To start the development server, run:
 
-```bash
+```
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
+
+This will open a development server at http://localhost:5137.
 
 ## Building
 
-To create a production version of your app:
+To build the app for production, run:
 
-```bash
+```
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+This will create a production build in the `dist` directory.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## More Information
+
+For more information, please see the following documentation:
+
+* [SvelteKit](https://kit.svelte.dev/)
+* [Capacitor](https://capacitorjs.com/)
+* [TailwindCSS](https://tailwindcss.com/)
+* [DaisyUI](https://daisyui.com/)
