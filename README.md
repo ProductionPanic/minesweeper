@@ -1,6 +1,6 @@
 # Native App Template
 
-This is a template for creating a native app using SvelteKit, Capacitor, TailwindCSS, and DaisyUI.
+native app using SvelteKit, Capacitor, TailwindCSS, and DaisyUI.
 
 ## Getting Started
 
@@ -29,7 +29,7 @@ To build the app for production, run:
 npm run build
 ```
 
-This will create a production build in the `dist` directory.
+This will create a production build in the `build` directory.
 
 ## More Information
 
