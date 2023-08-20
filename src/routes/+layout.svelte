@@ -1,5 +1,5 @@
 <script lang="ts">
-    import EmojiBackground from "$lib/components/EmojiBackground.svelte";
+    import BgAnimation from "$lib/components/BgAnimation.svelte";
     import LoadingElement from "$lib/components/LoadingComponent.svelte";
     import { page } from "$app/stores";
     import Alerts from "$lib/components/Alerts.svelte";
@@ -8,13 +8,7 @@
     import { onMount } from "svelte";
     import { addAlert } from "$lib/Alerts";
     import { Loading } from "$lib/Utils";
-
-    let showEmojiRain = true;
-
     const loading = Loading.store;
-
-    const blacklist = new RegExp("^(\\/game|\\/play)");
-    $: showEmojiRain = !blacklist.test($page.url.pathname);
 
     async function loaded() {
         if (!browser) return;
@@ -54,18 +48,10 @@
 </script>
 
 <Alerts />
-
-{#if showEmojiRain}
-    <EmojiBackground>
-        <div class="app-container">
-            <slot />
-        </div>
-    </EmojiBackground>
-{:else}
-    <div class="app-container">
-        <slot />
-    </div>
-{/if}
+<BgAnimation></BgAnimation>
+<div class="app-container">
+    <slot />
+</div>
 
 <LoadingElement />
 

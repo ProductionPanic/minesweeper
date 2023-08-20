@@ -48,7 +48,7 @@ export class MinesweeperDatabase extends Dexie {
 
     constructor() {
         super('MinesweeperDatabase');
-        this.version(3).stores({
+        this.version(4).stores({
             games: '++id, name, tiles, width, height, time, status, created, updated, difficulty',
             highscores: '++id, name, time, created, difficulty',
             options: 'key, value, created, updated',

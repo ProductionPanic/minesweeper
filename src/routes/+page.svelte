@@ -14,53 +14,34 @@
         goto("/game");
     }
 </script>
-
-<div class="hero mx-4 rounded-md mt-8">
-    <div class="hero-content text-center">
-        <div class="max-w-md">
-            <h1 class="text-5xl font-bold">Minesweeper</h1>
-            <p class="py-6">
-                A simple but beautifull version of the classic game.
-            </p>
-        </div>
+<div class="flex w-inherit justify-between flex-col">
+    <div class="flex flex-col gap-2 mt-6 p-4 justify-center items-center">
+        <h1 class="text-4xl font-bold">Minesweeper</h1>
+        <p class="text-center">
+            A simple but beautifull version of the classic game.
+        </p>
     </div>
-</div>
+    
+    <div class="grid grid-cols-2 gap-2 p-4">
+        {#if $lastGameId > 0}
+        <a href="/game" class="btn-secondary btn col-span-2">
+            Continue last game
+        </a>
+    {/if}
+    <button class="btn btn-primary btn-block" on:click={quickgame}>
+        Quick game
+    </button>
+    <a
+        class="btn btn-secondary btn-block"
+        href="/new-game"
+    >
+        New game
+    </a>
+    <a class="btn btn-neutral btn-block col-span-2" href="/settings"> Settings </a>
+    </div></div>
 
-<div class="hero mx-4 rounded-md">
-    <div class="hero-content text-center w-full">
-        <div class="max-w-md full-width-buttons">
-            <div class="grid grid-cols-2 gap-4">
-                {#if $lastGameId > 0}
-                    <a href="/game" class="btn-secondary btn col-span-2">
-                        Continue last game
-                    </a>
-                {/if}
-                <button class="btn btn-primary btn-block" on:click={quickgame}>
-                    Quick game
-                </button>
-                <a
-                    class="btn btn-primary btn-outline btn-block"
-                    href="/new-game"
-                >
-                    New game
-                </a>
-            </div>
-            <a class="btn btn-neutral btn-block" href="/settings"> Settings </a>
-            <div class="grid grid-cols-3 gap-4">
-                <a href="/extra" class="btn btn-accent"> Extras </a>
-                <button
-                    class="col-span-2 btn btn-outline btn-accent"
-                    on:click={review}
-                >
-                    Write a review
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style lang="scss">
-    .full-width-buttons {
-        @apply flex flex-col justify-between w-full gap-4;
+<style>
+    .w-inherit {
+        width: inherit;
     }
 </style>

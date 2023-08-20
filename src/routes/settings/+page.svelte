@@ -196,35 +196,6 @@
                         />
                     </label>
                 </div>
-                <div class="form-control w-full">
-                    <label class="cursor-pointer label">
-                        <span class="label-text">Show emoji rain</span>
-                        <input
-                            type="checkbox"
-                            class="toggle toggle-primary"
-                            bind:checked={set.emojirain}
-                            on:change={change}
-                        />
-                    </label>
-                </div>
-                {#if set.emojirain}
-                    <label
-                        class="cursor-pointer label flex-col flex items-start w-full gap-2"
-                    >
-                        <span class="label-text">
-                            Amount of emojis in the rain
-                        </span>
-                        <input
-                            type="range"
-                            min="0"
-                            max="75"
-                            step="5"
-                            bind:value={set.emojirainCount}
-                            on:change={change}
-                            class="range range-primary"
-                        />
-                    </label>
-                {/if}
                 <button
                     class="btn btn-error btn-outline btn-sm"
                     on:click={reset_all}

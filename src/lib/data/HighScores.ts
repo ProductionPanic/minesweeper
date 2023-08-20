@@ -1,4 +1,4 @@
-import { liveQuery } from "dexie";
+import { liveQuery, type Observable } from "dexie";
 import { db, type MinesweeperHighscore } from "./db";
 
 export class highscores {
@@ -12,7 +12,7 @@ export class highscores {
         return highscores.instance;
     }
 
-    public getHighScore(difficulty: number) {
+    public getHighScore(difficulty: number):Observable<MinesweeperHighscore[]> {
         return liveQuery(() => db.highscores.where("difficulty").equals(difficulty).toArray())
     }
 

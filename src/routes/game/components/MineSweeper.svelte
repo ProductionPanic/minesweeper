@@ -65,7 +65,7 @@
                     size={TILE_SIZE}
                     on:flag={() => flag(tile)}
                     on:reveal={() => reveal(tile)}
-                    {tile}
+                    tile={tile}
                 />
             {/each}
         </div>
@@ -82,7 +82,7 @@
     }
 
     .field-container {
-        @apply min-h-screen flex flex-col;
+        @apply min-h-screen flex flex-col w-full flex-1 ;
         display: flex;
         align-items: center;
     }

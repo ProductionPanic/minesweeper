@@ -1,16 +1,10 @@
 <script lang="ts">
-    import EmojiRain from "$lib/components/EmojiRain.svelte";
     import { page } from "$app/stores";
     import { fly } from "svelte/transition";
     import { settings } from "$lib/data/settings";
 </script>
 
 <div class="page-content">
-    {#if $settings.emojirain}
-        {#key $settings.emojirainCount}
-            <EmojiRain amount={$settings.emojirainCount} />
-        {/key}
-    {/if}
     {#key $page.url}
         <div
             class="content-inner"
@@ -33,7 +27,8 @@
         }
     }
     .content-inner {
-        @apply min-h-screen w-screen overflow-x-hidden flex flex-col justify-between items-center;
+        @apply min-h-screen w-full flex flex-col justify-between items-center;
         @apply relative z-10;
+        max-width: 100vw;
     }
 </style>

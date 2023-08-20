@@ -29,12 +29,21 @@
     let _highscores: Observable<MinesweeperHighscore[]>;
     let highscore: MinesweeperHighscore;
 
-    $: if (_highscores && _highscores.length > 0) {
-        highscore = _highscores[0];
+    $: if ($_highscores && $_highscores.length > 0) {
+        highscore = $_highscores[0]
     }
+
+    $:console.log($_highscores);
+    $:console.log(highscore);
 
     $: if ($gameDifficulty) {
         _highscores = highscores.get().getHighScore($gameDifficulty);
+    }
+
+    function abbrv(time: number): string {
+        if (time < 60) return "s";
+        if (time < 3600) return "m";
+        return "h";
     }
 </script>
 
@@ -66,14 +75,13 @@
         </a>
 
         {#if highscore}
-            <a
-                class="btn btn-ghost normal-case text-xl"
-                href={`https://www.google.com/search?q=${highscore.name}`}
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                {highscore.name}
-            </a>
+  
+            <div class="stat text-center">
+                <div class="stat-title">Fastest time</div>
+                <div class="stat-value text-primary">
+                    {highscore.time}{abbrv(highscore.time)}
+                </div>
+            </div>
         {/if}
     </div>
     <div class="flex-none">
