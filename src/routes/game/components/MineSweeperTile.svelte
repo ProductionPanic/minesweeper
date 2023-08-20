@@ -85,42 +85,27 @@
         @apply transition-all;
         @apply relative;
         @apply overflow-hidden;
-        @apply shadow;
+        @apply shadow text-base-content;
 
         width: var(--size);
         height: var(--size);
-
-        &.revealed {
-            @apply bg-neutral-800;
-
-            &.number-1 {
-                @apply text-blue-500;
+        &.bomb {
+            @apply text-error-content;
+        }
+        &.exploded {
+            &:not(.bomb) {
+                animation: bomb 0.5s ease-in-out;
             }
-            &.number-2 {
-                @apply text-green-500;
+            &.bomb {
+                animation: bomb_boom 0.5s ease-in-out;
             }
-            &.number-3 {
-                @apply text-red-500;
-            }
-            &.number-4 {
-                @apply text-purple-500;
-            }
-            &.number-5 {
-                @apply text-yellow-500;
-            }
-            &.number-6 {
-                @apply text-pink-500;
-            }
-            &.number-7 {
-                @apply text-gray-500;
-            }
-            &.number-8 {
-                @apply text-gray-300;
-            }
+        }
+        &.flagged {
+            @apply bg-success-content;
         }
         &.revealed.bomb {
             svg {
-                fill: theme("colors.red.600");
+                @apply fill-error;
             }
         }
         &.exploded {
@@ -133,6 +118,34 @@
         }
         &.flagged {
             @apply bg-base-100;
+        }
+        &.revealed {
+            @apply bg-neutral-800;
+
+            &.number-1 {
+                @apply text-primary;
+            }
+            &.number-2 {
+                @apply text-secondary;
+            }
+            &.number-3 {
+                @apply text-accent;
+            }
+            &.number-4 {
+                @apply text-success;
+            }
+            &.number-5 {
+                @apply text-neutral;
+            }
+            &.number-6 {
+                @apply text-warning;
+            }
+            &.number-7 {
+                @apply text-error;
+            }
+            &.number-8 {
+                @apply text-info;
+            }
         }
     }
 

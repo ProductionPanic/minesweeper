@@ -36,6 +36,10 @@
     }
     let lastpath: string | null = null;
 
+    let showAnimation = true;
+
+    $: showAnimation = $page.url.pathname != "/game";
+
     $: if ($page.url) {
         if (lastpath == null) {
             lastpath = $page.url.pathname;
@@ -50,9 +54,9 @@
 </script>
 
 <Alerts />
-{#if ready}
-<BgAnimation></BgAnimation>
-{/if}	
+{#if ready && showAnimation}
+    <BgAnimation />
+{/if}
 <div class="app-container">
     <slot />
 </div>

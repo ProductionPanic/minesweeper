@@ -1,4 +1,5 @@
 import { writable, type Writable } from "svelte/store";
+import anime from "animejs";
 
 export function storeToPromise<T>(store: Writable<T>) {
     return new Promise<T>((resolve) => {
@@ -32,4 +33,16 @@ export class Loading {
 
 export function Capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export async function animePromise(animeOptions: anime.AnimeParams) {
+    return wait_for_anime(anime(animeOptions));
+}
+
+export async function wait_for_anime(anime: anime.AnimeInstance) {
+    return new Promise<void>((resolve) => {
+        anime.finished.then(() => {
+            resolve();
+        })
+    })
 }
