@@ -9,7 +9,7 @@
     import { addAlert } from "$lib/Alerts";
     import { Loading } from "$lib/Utils";
     const loading = Loading.store;
-
+    let ready = false;
     async function loaded() {
         if (!browser) return;
         // wait for sessionstorage to be available
@@ -17,6 +17,8 @@
         if (!window.sessionStorage.getItem("firstTime")) {
             window.sessionStorage.setItem("firstTime", "true");
         }
+
+        ready = true;
 
         SettingsHandler.init();
 
@@ -48,7 +50,9 @@
 </script>
 
 <Alerts />
+{#if ready}
 <BgAnimation></BgAnimation>
+{/if}	
 <div class="app-container">
     <slot />
 </div>
