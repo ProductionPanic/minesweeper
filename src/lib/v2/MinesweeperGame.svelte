@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { animePromise } from "$lib/Utils";
+    import { animePromise, sleep } from "$lib/Utils";
     import anime from "animejs";
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
 
     enum TileType {
         Empty,
@@ -17,18 +17,20 @@
     }
 
     interface Tile {
-        element: HTMLDivElement|null;
+        element: HTMLDivElement | null;
         x: number;
         y: number;
         type: TileType;
         state: TileState;
         number: number;
+        distanceFromExplosion?: number;
+        tick?: number;
     }
 
     const tile_size = 32;
     let field_container: HTMLDivElement;
-    let cols:number;
-    let rows:number;
+    let cols: number;
+    let rows: number;
     let tiles: Tile[] = [];
 
     onMount(() => {
@@ -54,7 +56,7 @@
         tiles = [...tiles];
     });
 
-    async function explode(tile: HTMLElement|number|Tile) {
+    async function explode(tile: HTMLElement | number | Tile) {
         let index = -1;
         if (typeof tile === "number") {
             index = tile;
@@ -66,32 +68,35 @@
 
         if (index === -1) return;
 
-        field_container.style.setProperty('--explosion-source-x', `${tiles[index].x * tile_size}px`);
-        field_container.style.setProperty('--explosion-source-y', `${tiles[index].y * tile_size}px`);
+        field_container.style.setProperty(
+            "--explosion-source-x",
+            `${tiles[index].x * tile_size}px`
+        );
+        field_container.style.setProperty(
+            "--explosion-source-y",
+            `${tiles[index].y * tile_size}px`
+        );
 
-        tiles=tiles.map(i=>{
-            i.state=TileState.exploded;
+        tiles = tiles.map((i) => {
+            const distance = Math.sqrt(
+                Math.pow(i.x - tiles[index].x, 2) +
+                    Math.pow(i.y - tiles[index].y, 2)
+            );
+            i.distanceFromExplosion = distance;
+            i.state = TileState.exploded;
+            i.tick = i.tick ? i.tick + 1 : 1;
             return i;
-        })
-        
-
-        tiles.forEach((t, i) => {
-            if (i === index) {
-                t.state = TileState.Hidden;
-            }
         });
-
     }
 
-    
     async function tileClick(tile: Tile) {
         await explode(tile);
-        
     }
 </script>
 
 <div class="field-container" bind:this={field_container}>
-    <div class="field-tiles-wrapper"
+    <div
+        class="field-tiles-wrapper"
         style="
             --width: {cols * tile_size}px;
             --height: {rows * tile_size}px;
@@ -100,30 +105,33 @@
         "
     >
         {#each tiles as tile}
-            <div
-                role="button"
-                tabindex="0"
-                on:keyup={()=>{}}
-                on:click={()=>tileClick(tile)}
-                class="field-tile"
-                style="
+            {#key tile.tick}
+                <div
+                    role="button"
+                    tabindex="0"
+                    on:keyup={() => {}}
+                    on:click={() => tileClick(tile)}
+                    class="field-tile"
+                    style="
                     --x: {tile.x * tile_size}px;
                     --y: {tile.y * tile_size}px;
+                    --distance: {tile.distanceFromExplosion ?? 0};
                     --size: {tile_size}px;
                 "
-                bind:this={tile.element}
-                class:exploded={tile.state === TileState.exploded}
-            >
-                {#if tile.state == TileState.Revealed}
-                    {#if tile.type == TileType.Bomb}
-                        <div class="field-tile-bomb">
-                            <div class="field-tile-bomb-inner"></div>
-                        </div>
-                    {:else if tile.type == TileType.Number}
-                        <div class="field-tile-number">{tile.number}</div>
+                    bind:this={tile.element}
+                    class:exploded={tile.state === TileState.exploded}
+                >
+                    {#if tile.state == TileState.Revealed}
+                        {#if tile.type == TileType.Bomb}
+                            <div class="field-tile-bomb">
+                                <div class="field-tile-bomb-inner" />
+                            </div>
+                        {:else if tile.type == TileType.Number}
+                            <div class="field-tile-number">{tile.number}</div>
+                        {/if}
                     {/if}
-                {/if}
-            </div>
+                </div>
+            {/key}
         {/each}
     </div>
 </div>
@@ -147,7 +155,7 @@
                 top: var(--y);
                 width: var(--size);
                 height: var(--size);
-                background-color: #ccc;
+                background-color: theme("colors.base-content");
                 border: 1px solid #aaa;
                 display: flex;
                 justify-content: center;
@@ -157,7 +165,6 @@
                     @apply relative;
                     width: 80%;
                     height: 80%;
-                    background-color: #000;
                     border-radius: 50%;
                     display: flex;
                     justify-content: center;
@@ -177,8 +184,7 @@
                 }
 
                 &.exploded {
-                    animation-delay: calc(
-                    );
+                    animation-delay: calc(var(--distance) * 0.05s);
                     animation-name: explode;
                     animation-duration: 0.5s;
                     animation-fill-mode: forwards;
@@ -192,11 +198,17 @@
     @keyframes explode {
         0% {
             transform: scale(1);
-            opacity: 1;
+            background-color: theme("colors.error");
         }
-        100% {
+        5% {
+            transform: scale(0.8);
+        }
+        10% {
+            transform: scale(1);
+            background-color: theme("colors.error");
+        }
+        50% {
             transform: scale(2);
-            opacity: 0;
         }
     }
 </style>
