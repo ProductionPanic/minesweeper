@@ -64,12 +64,57 @@
         }
     }
 
+    function hslToHex(h: number, s: number, l: number) {
+        l /= 100;
+        const a = (s * Math.min(l, 1 - l)) / 100;
+        const f = (n) => {
+            const k = (n + h / 30) % 12;
+            const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * color)
+                .toString(16)
+                .padStart(2, "0"); // convert to Hex and prefix "0" if needed
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
+    }
+
+    function hslStringToHex(hsl: string) {
+        const test = /\d+%?\s/g;
+
+        if (!test.test(hsl)) {
+            return null;
+        }
+
+        let matches = hsl.match(test);
+
+        if (matches?.length !== 3) {
+            return null;
+        }
+
+        matches = matches.map((i) => i.replaceAll(/[^\d]/gim, ""));
+
+        const [h, s, l] = matches;
+
+        return hslToHex(+h, +s, +l);
+    }
+
+    function colors(el: HTMLElement): { default: string; boom: string } {
+        const styles = getComputedStyle(el);
+        const boomColorHsl = styles.getPropertyValue("--boom-color");
+        const blockColorHsl = styles.getPropertyValue("--block-color");
+
+        return {
+            default: hslStringToHex(blockColorHsl) ?? "#000",
+            boom: hslStringToHex(boomColorHsl) ?? "#fff",
+        };
+    }
+
     async function explosion(startIndex: number) {
         const grid = [cols, rows];
 
         const item = blocks[startIndex].element as HTMLElement;
 
         item.style.zIndex = "1000";
+        item.innerHTML = bomb_svg;
         // rumble
         await animePromise({
             targets: [item],
@@ -88,8 +133,6 @@
             loop: false,
             duration: 1000,
         });
-
-        item.innerHTML = bomb_svg;
 
         // rumble
         await animePromise({
@@ -125,11 +168,13 @@
             duration: 200,
         });
 
+        const _colors = colors(item);
         let animation = anime({
             targets: blocks.map((b) => b.element),
             keyframes: [
                 {
                     scale: 0.2,
+                    backgroundColor: _colors.boom,
                 },
                 {
                     scale: 1.5,
@@ -139,9 +184,10 @@
                 },
                 {
                     scale: 1,
+                    backgroundColor: _colors.default,
                 },
             ],
-            delay: anime.stagger(50, { grid: [cols, rows], from: startIndex }),
+            delay: anime.stagger(30, { grid: [cols, rows], from: startIndex }),
             loop: false,
         });
 
@@ -171,6 +217,11 @@
 </div>
 
 <style lang="scss">
+    :root {
+        --block-color: theme("colors.base-100");
+        --boom-color: theme("colors.error");
+    }
+
     .bg-container {
         position: fixed;
         left: calc((100vw - (var(--cols) * var(--size))) / 2);
@@ -195,7 +246,7 @@
     .bg-block {
         box-sizing: border-box;
         border: 1px solid theme("colors.base-300");
-        background-color: theme("colors.base-200");
+        background-color: var(--block-color);
         width: var(--size);
         height: var(--size);
         transform: scale(var(--scale));

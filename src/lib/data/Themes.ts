@@ -34,7 +34,6 @@ export const darkThemes = [
     "synthwave",
     "halloween",
     "forest",
-    "black",
     "luxury",
     "dracula",
     "night",
@@ -47,15 +46,9 @@ export const lightThemes = [
     "bumblebee",
     "emerald",
     "retro",
-    "cyberpunk",
     "valentine",
-    "garden",
-    "aqua",
     "pastel",
     "fantasy",
-    "cmyk",
-    "autumn",
-    "winter",
 ]
 
 export type Theme = typeof Themes[number];

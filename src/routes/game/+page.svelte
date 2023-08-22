@@ -8,6 +8,7 @@
     import { beforeNavigate } from "$app/navigation";
     import { lastGameId, setLastGame } from "$lib/data/LastGame";
     import { GameTimer } from "$lib/Game/GameTimer";
+    import { Loading } from "$lib/Utils";
 
     export let data: PageData;
 
@@ -23,6 +24,7 @@
     });
 
     beforeNavigate(() => {
+        Loading.start();
         if (field?.status === 0 && field.id) {
             lastGameId.set(field.id);
         } else if (field?.status !== 0) {

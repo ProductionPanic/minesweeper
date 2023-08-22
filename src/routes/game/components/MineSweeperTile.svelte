@@ -79,7 +79,7 @@
 <style lang="scss">
     .tile {
         @apply flex items-center justify-center rounded-md;
-        @apply bg-neutral-900;
+        @apply bg-neutral-900 bg-opacity-60;
         @apply border border-base-300;
         @apply cursor-pointer;
         @apply transition-all;
@@ -120,7 +120,7 @@
             @apply bg-base-100;
         }
         &.revealed {
-            @apply bg-neutral-800;
+            @apply bg-neutral-800 bg-opacity-40;
 
             &.number-1 {
                 @apply text-primary;
@@ -146,6 +146,14 @@
             &.number-8 {
                 @apply text-info;
             }
+            &.number-0 {
+                opacity: 0;
+                @apply shadow-none;
+            }
+        }
+
+        &.exploded {
+            @apply bg-opacity-100;
         }
     }
 
