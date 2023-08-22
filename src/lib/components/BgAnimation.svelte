@@ -1,160 +1,205 @@
-<canvas 
-bind:this={canvas} 
-class="bg-canvas"
-></canvas>
-
-<style lang="scss">
-    .bg-canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: -1;
-        opacity: .3;
-    }
-</style>
-
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { browser } from "$app/environment";
+    import { animePromise, sleep, wait_for_anime } from "$lib/Utils";
+    import { onDestroy, onMount, tick } from "svelte";
+    import { tweened } from "svelte/motion";
+    import type { Writable } from "svelte/store";
+    import anime from "animejs";
+    import { check } from "$lib/Alerts";
+    import { page } from "$app/stores";
 
-    let canvas: HTMLCanvasElement;
-    let ctx: CanvasRenderingContext2D;
+    let rows: number;
+    let cols: number;
 
-    let width: number;
-    let height: number;
-    
-    let numberTrails: {
-        x: number;
-        y: number;
-        direction: number;
-        speed: number;  
-        chars: string[];
-    }[] = [];
-    
-    let charPool = "0123456789";
-    let bg:string;
-    onMount(() => {
-        ctx = canvas.getContext("2d")!;
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
+    interface Block {
+        element?: HTMLElement;
+    }
+    let blocks: Block[] = [];
 
-        const styles= getComputedStyle(canvas);
-        const color = styles.getPropertyValue("--color-accent");
-        const _bg = color
+    let running = true;
 
-        bg = _bg || "#000000";
+    const bomb_svg: string = `<svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="1em"
+                        viewBox="0 0 512 512"
+                        ><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path
+                            d="M459.1 52.4L442.6 6.5C440.7 2.6 436.5 0 432.1 0s-8.5 2.6-10.4 6.5L405.2 52.4l-46 16.8c-4.3 1.6-7.3 5.9-7.2 10.4c0 4.5 3 8.7 7.2 10.2l45.7 16.8 16.8 45.8c1.5 4.4 5.8 7.5 10.4 7.5s8.9-3.1 10.4-7.5l16.5-45.8 45.7-16.8c4.2-1.5 7.2-5.7 7.2-10.2c0-4.6-3-8.9-7.2-10.4L459.1 52.4zm-132.4 53c-12.5-12.5-32.8-12.5-45.3 0l-2.9 2.9C256.5 100.3 232.7 96 208 96C93.1 96 0 189.1 0 304S93.1 512 208 512s208-93.1 208-208c0-24.7-4.3-48.5-12.2-70.5l2.9-2.9c12.5-12.5 12.5-32.8 0-45.3l-80-80zM200 192c-57.4 0-104 46.6-104 104v8c0 8.8-7.2 16-16 16s-16-7.2-16-16v-8c0-75.1 60.9-136 136-136h8c8.8 0 16 7.2 16 16s-7.2 16-16 16h-8z"
+                        /></svg
+                    >`;
 
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, width, height);
+    const preferredSize = 32;
+    onMount(async () => {
+        if (!browser) return;
+        const { width, height } = document.body.getBoundingClientRect();
+        cols = Math.ceil(width / preferredSize);
+        rows = Math.ceil(height / preferredSize);
 
-
-
-        ctx.fillStyle = color;
-        ctx.font = "20px monospace";
-
-        for (let i = 0; i < 100; i++) {
-        let dir = Math.floor(Math.random() * 4)
-        if(dir == 0) dir = 0;
-        else if (dir == 1) dir = 90;
-        else if (dir == 2) dir = 180;
-        else if (dir == 3) dir = 270;
-        else if( dir == 4) dir = 0;
-            numberTrails.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                direction: dir,
-                speed: Math.random() * 5 + 1,
-                chars: get_chars()
-            });
+        for (let x = 0; x < cols; x++) {
+            for (let y = 0; y < rows; y++) {
+                blocks.push({});
+            }
         }
 
-        requestAnimationFrame(draw);
+        blocks = [...blocks];
 
-        
+        await tick();
 
+        animate();
     });
 
-    function get_chars() {
-        // 10 random chars
-        const chars = [];
-        for (let i = 0; i < 10; i++) {
-            chars.push(charPool[Math.floor(Math.random() * charPool.length)]);
-        }
-        // repeat each char 10 times
-        return chars.flatMap((char) => Array(30).fill(char));
+    onDestroy(() => {
+        running = false;
+    });
+
+    $: if ($page.url.pathname == "/game") {
+        running = false;
     }
 
-    function draw() {
-        let lessOpacityBg = bg.replace("1)", "0");
-        // draw background
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, width, height);
-
-        // single char at the given position
-        const fontColor = getComputedStyle(canvas).getPropertyValue("--color-accent-content");
-        for (let i = 0; i < numberTrails.length; i++) {
-            const trail = numberTrails[i];
-            const { x, y, direction, speed, chars } = trail;
-            const char = chars.shift();
-            chars.push(char!);
-
-            let charColor;
-            switch(char) {
-                case "0":
-                    charColor = "#333";
-                    break;
-                case "1":
-                    charColor = "#30f";
-                    break;
-                case "2": 
-                    charColor = "#0f0";
-                    break;
-                case "3":
-                    charColor = "#f00";
-                    break;
-                case "4":
-                    charColor = "#f0f";
-                    break;
-                case "5":
-                    charColor = "#ff0";
-                    break;
-                case "6":
-                    charColor = "#0ff";
-                    break;
-                case "7":
-                    charColor = "#fff";
-                    break;
-                case "8":
-                    charColor = "#ccc";
-                    break;
-                case "9":
-                    charColor = "#999";
-                    break;
-                default:
-                    charColor = fontColor;
-
-
-            }
-            ctx.fillStyle = charColor;
-            ctx.fillText(char!, x, y);
-
-            trail.x += Math.cos(direction) * speed;
-            trail.y += Math.sin(direction) * speed;
-
-            if (trail.x < 0) {
-                trail.x = width;
-            } else if (trail.x > width) {
-                trail.x = 0;
-            }
-
-            if (trail.y < 0) {
-                trail.y = height;
-            } else if (trail.y > height) {
-                trail.y = 0;
-            }
+    async function animate() {
+        while (running) {
+            const random_block_index = Math.floor(
+                Math.random() * blocks.length
+            );
+            await explosion(random_block_index);
         }
+    }
 
-        requestAnimationFrame(draw);
+    async function explosion(startIndex: number) {
+        const grid = [cols, rows];
+
+        const item = blocks[startIndex].element as HTMLElement;
+
+        item.style.zIndex = "1000";
+        // rumble
+        await animePromise({
+            targets: [item],
+            keyframes: [
+                { rotate: 0, scale: 0 },
+                { rotate: 5 },
+                { rotate: -5 },
+                { rotate: 7 },
+                { rotate: -7, scale: 1 },
+                { rotate: 10 },
+                { rotate: -10 },
+                { rotate: 15 },
+                { rotate: -15 },
+                { rotate: 0 },
+            ],
+            loop: false,
+            duration: 1000,
+        });
+
+        item.innerHTML = bomb_svg;
+
+        // rumble
+        await animePromise({
+            targets: [item],
+            keyframes: [
+                { rotate: 0 },
+                { rotate: 5 },
+                { rotate: -5 },
+                { rotate: 7 },
+                { rotate: -7 },
+                { rotate: 10 },
+                { rotate: -10 },
+                { rotate: 15 },
+                { rotate: -15 },
+                { rotate: 0 },
+            ],
+            loop: false,
+            duration: 1000,
+        });
+
+        await animePromise({
+            targets: [item],
+            scale: 2,
+            loop: false,
+            duration: 500,
+        });
+        item.innerHTML = "";
+
+        animePromise({
+            targets: [item],
+            scale: 0.2,
+            loop: false,
+            duration: 200,
+        });
+
+        let animation = anime({
+            targets: blocks.map((b) => b.element),
+            keyframes: [
+                {
+                    scale: 0.2,
+                },
+                {
+                    scale: 1.5,
+                },
+                {
+                    scale: 0.9,
+                },
+                {
+                    scale: 1,
+                },
+            ],
+            delay: anime.stagger(50, { grid: [cols, rows], from: startIndex }),
+            loop: false,
+        });
+
+        await wait_for_anime(animation);
+
+        await animePromise({
+            targets: [item],
+            scale: 1,
+            loop: false,
+            duration: 200,
+        });
+
+        item.style.zIndex = "inherit";
+        item.innerHTML = "";
     }
 </script>
+
+<div
+    class="bg-container"
+    style="--cols: {cols}; --rows: {rows}; --size:{preferredSize}px"
+>
+    <div class="bg-animation">
+        {#each blocks as block}
+            <div class="bg-block" bind:this={block.element} />
+        {/each}
+    </div>
+</div>
+
+<style lang="scss">
+    .bg-container {
+        position: fixed;
+        left: calc((100vw - (var(--cols) * var(--size))) / 2);
+        top: calc((100vh - (var(--rows) * var(--size))) / 2);
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: -1;
+    }
+
+    .bg-animation {
+        display: grid;
+        grid-template-columns: repeat(var(--cols), 1fr);
+        grid-template-rows: repeat(var(--rows), 1fr);
+        width: 100%;
+        height: 100%;
+    }
+
+    .bg-block {
+        box-sizing: border-box;
+        border: 1px solid theme("colors.base-300");
+        background-color: theme("colors.base-200");
+        width: var(--size);
+        height: var(--size);
+        transform: scale(var(--scale));
+
+        @apply flex justify-center items-center fill-error;
+    }
+</style>
