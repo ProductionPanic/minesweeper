@@ -65,7 +65,6 @@
 
 <style lang="scss">
     .app-container {
-        max-width: 1200px;
         width: 100%;
         min-height: 100vh;
         display: flex;
