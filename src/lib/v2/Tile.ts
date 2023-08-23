@@ -76,19 +76,19 @@ export class Entity {
         P5.fill(...color, opacity);
         // P5.stroke(...borderColors, borderOpacity);
 
-        P5.push();
-        P5.translate(position.x, position.y);
-        P5.push();
+        
         // P5.translate(position.x, position.y);
         if (this.scale !== 1) {
-            const xDiff = this.size.x * this.scale - this.size.x;
-            const yDiff = this.size.y * this.scale - this.size.y;
-            P5.translate(-xDiff / 2, -yDiff / 2);
-            P5.scale(this.scale);
+            const size = this.size.copy().mult(this.scale);
+            P5.rect(
+                position.x - size.x / 2,
+                position.y - size.y / 2,
+                size.x,
+                size.y
+            );
+        } else {
+            P5.rect(this.position.x, this.position.y, this.size.x, this.size.y);
         }
-        P5.rect(0, 0, this.size.x, this.size.y);
-        P5.pop();
-        P5.pop();
 
 
     }

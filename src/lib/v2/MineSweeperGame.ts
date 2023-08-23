@@ -88,12 +88,24 @@ class Tile extends Entity {
         this.on("tile:click", this.onClick);
     }
 
+    private _neighbors: {
+        direct: Tile[],
+        diagonal: Tile[],
+        all: Tile[],
+    } = {
+        direct: [],
+        diagonal: [],
+        all: [],
+    };
+
     private getNeighbors(type: "direct" | "diagonal" | "all" = "all") {
+        if(this._neighbors[type].length > 0) return this._neighbors[type];
+         
         const direct = [this.index - 1, this.index + 1, this.index - this.context.cols, this.index + this.context.cols];
         const diagonal = [this.index - this.context.cols - 1, this.index - this.context.cols + 1, this.index + this.context.cols - 1, this.index + this.context.cols + 1];
         const check = type === "direct" ? direct : type === "diagonal" ? diagonal : direct.concat(diagonal);
 
-        return check.filter((index) => {
+        const output = check.filter((index) => {
             const boundsCheck = index >= 0 && index < this.context.tiles.length;
             const xCheck = Math.abs(index % this.context.cols - this.index % this.context.cols) <= 1;
             const yCheck = Math.abs(Math.floor(index / this.context.cols) - Math.floor(this.index / this.context.cols)) <= 1;
@@ -101,9 +113,16 @@ class Tile extends Entity {
         }).map((index) => {
             return this.context.tiles[index];
         });
+        
+        this._neighbors[type] = output;
+
+        return output;
     }
 
     async onClick() {
+        await this.transition({
+            rotation: 45,
+        })
         this.explode();
     }
 
@@ -111,27 +130,20 @@ class Tile extends Entity {
         after && await sleep(after);
         if (this.exploded) return;
         this.exploded = true;
-        const dur = 200;
-        await this.transition({
-            scale: 0.5,
-        }, 2 * dur);
-        await this.transition({
+        const dur = 40;
+        this.transition({
             scale: 0.8,
-        }, 1 * dur)
-        for (const tile of this.getNeighbors("all")) {
-            tile.explode();
+        }, 3 * dur);
+        for (const tile of this.getNeighbors("direct")) {
+            tile.explode(50);
         }
         await this.transition({
-            scale: 1.6,
+            scale: 1.2,
         }, 10 * dur)
-        await this.transition({
-            scale: 1.8,
-        }, 2 * dur)
         await this.transition({
             scale: 1,
             rotation: 180
-        }, 20 * dur)
-        await sleep(dur)
+        }, 11 * dur)
         this.exploded = false;
         this.opacity = 255;
         this.scale = 1;
