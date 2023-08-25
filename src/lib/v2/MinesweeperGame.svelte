@@ -5,6 +5,7 @@
     import { MineSweeperGame } from "$lib/v2/MineSweeperGame";
 
     let field_container: HTMLElement;
+    let canvas: HTMLCanvasElement;
     onMount(async () => {
         const instance = await MineSweeperGame(field_container);
         console.log(instance);
@@ -15,11 +16,15 @@
 
 <style lang="scss">
     .field-container {
-        @apply w-full h-full flex-1;
+        @apply flex-1 h-full;
 
         display: flex;
         justify-content: center;
         align-items: center;
         touch-action: none;
+
+        canvas {
+            @apply h-full w-full;
+        }
     }
 </style>

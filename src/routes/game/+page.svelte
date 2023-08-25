@@ -8,6 +8,6 @@
 
 <style lang="scss">
     .wrapper {
-        @apply w-full h-screen flex justify-center items-center mx-auto;
+        @apply w-screen h-screen flex justify-center items-center mx-auto;
     }
 </style>
