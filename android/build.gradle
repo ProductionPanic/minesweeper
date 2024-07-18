@@ -1,7 +1,10 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    
+    ext {
+        targetSdkVersion = "34"
+        minSdkVersion = "34"
+    }
     repositories {
         google()
         mavenCentral()
