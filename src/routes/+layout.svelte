@@ -1,5 +1,4 @@
 <script lang="ts">
-    import BgAnimation from "$lib/components/BgAnimation.svelte";
     import LoadingElement from "$lib/components/LoadingComponent.svelte";
     import { page } from "$app/stores";
     import Alerts from "$lib/components/Alerts.svelte";
@@ -9,7 +8,6 @@
     import { addAlert } from "$lib/Alerts";
     import { Loading } from "$lib/Utils";
     const loading = Loading.store;
-    let ready = false;
     async function loaded() {
         if (!browser) return;
         // wait for sessionstorage to be available
@@ -17,8 +15,6 @@
         if (!window.sessionStorage.getItem("firstTime")) {
             window.sessionStorage.setItem("firstTime", "true");
         }
-
-        ready = true;
 
         SettingsHandler.init();
 
@@ -36,10 +32,6 @@
     }
     let lastpath: string | null = null;
 
-    let showAnimation = true;
-
-    $: showAnimation = $page.url.pathname != "/game";
-
     $: if ($page.url) {
         if (lastpath == null) {
             lastpath = $page.url.pathname;
@@ -54,9 +46,6 @@
 </script>
 
 <Alerts />
-{#if ready && showAnimation}
-    <BgAnimation />
-{/if}
 <div class="app-container">
     <slot />
 </div>
